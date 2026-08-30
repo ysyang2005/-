@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Trout's Promise — A Slovenian Coin Necklace</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   RESET & BASE — British Elegance
+   ============================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%;
+  background: #0c0a08;
+  font-family: 'Inter', -apple-system, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  color: #f5f0e8;
+}
+
+/* ============================================
+   PHONE FRAME — Desktop centering
+   ============================================ */
+.phone-wrapper {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 40%, #1a1510 0%, #0c0a08 70%);
+}
+.phone-frame {
+  position: relative;
+  width: 100%; height: 100%;
+  max-width: 430px; max-height: 932px;
+  background: #000;
+  overflow: hidden;
+  border-radius: 0;
+  box-shadow: 0 0 80px rgba(212,175,55,0.08);
+}
+@media (min-width: 500px) {
+  .phone-frame { border-radius: 40px; border: 6px solid #1a1714; }
+}
+
+/* ============================================
+   SCENE SYSTEM
+   ============================================ */
+.scene {
+  position: absolute; inset: 0;
+  opacity: 0; visibility: hidden;
+  transition: opacity 1s cubic-bezier(0.4,0,0.2,1), visibility 1s;
+  overflow: hidden;
+}
+.scene.active { opacity: 1; visibility: visible; }
+.scene-bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Ken Burns — slow elegant zoom */
+.ken-burns-in { animation: kenBurnsIn 8s ease-out forwards; }
+.ken-burns-slow { animation: kenBurnsSlow 10s ease-in-out forwards; }
+@keyframes kenBurnsIn {
+  0% { transform: scale(1.15) translate(2%,1%); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: scale(1.02) translate(0,0); opacity: 1; }
+}
+@keyframes kenBurnsSlow {
+  0% { transform: scale(1) translate(0,0); }
+  100% { transform: scale(1.1) translate(-1.5%,-1%); }
+}
+
+/* ============================================
+   SLICE TRANSITION — 画面切片展开
+   ============================================ */
+.slice-overlay {
+  position: absolute; inset: 0; z-index: 50;
+  display: flex; pointer-events: none;
+}
+.slice {
+  flex: 1; background: #0c0a08;
+  transform: scaleY(1);
+  transition: transform 0.8s cubic-bezier(0.77,0,0.175,1);
+}
+.slice:nth-child(odd) { transform-origin: top; }
+.slice:nth-child(even) { transform-origin: bottom; }
+.slice-overlay.reveal .slice { transform: scaleY(0); }
+.slice-overlay.reveal .slice:nth-child(1) { transition-delay: 0s; }
+.slice-overlay.reveal .slice:nth-child(2) { transition-delay: 0.06s; }
+.slice-overlay.reveal .slice:nth-child(3) { transition-delay: 0.12s; }
+.slice-overlay.reveal .slice:nth-child(4) { transition-delay: 0.18s; }
+.slice-overlay.reveal .slice:nth-child(5) { transition-delay: 0.24s; }
+.slice-overlay.reveal .slice:nth-child(6) { transition-delay: 0.30s; }
+
+/* ============================================
+   PROGRESS BAR — 优雅分段
+   ============================================ */
+.progress-container {
+  position: absolute; top: 14px; left: 16px; right: 16px;
+  display: flex; gap: 5px; z-index: 100;
+}
+.progress-seg {
+  flex: 1; height: 2.5px;
+  background: rgba(245,240,232,0.2);
+  border-radius: 2px; overflow: hidden;
+}
+.progress-seg-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #d4af37, #f4e4bc);
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+.progress-seg.complete .progress-seg-fill { width: 100%; }
+
+/* ============================================
+   TEXT OVERLAYS — British Typography
+   ============================================ */
+.text-bottom {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 100px 32px 70px;
+  background: linear-gradient(transparent, rgba(12,10,8,0.4) 30%, rgba(12,10,8,0.85));
+  z-index: 10;
+}
+.text-center {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center; z-index: 10; width: 85%;
+}
+
+/* Headline — Playfair Display */
+.headline {
+  font-family: 'Playfair Display', serif;
+  font-size: 34px; font-weight: 600;
+  color: #f5f0e8; line-height: 1.2;
+  letter-spacing: 0.3px;
+  margin-bottom: 12px;
+}
+.headline.gold { color: #d4af37; }
+.headline.italic { font-style: italic; font-weight: 400; }
+
+/* Subhead — Cormorant Garamond */
+.subhead {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-style: italic; font-weight: 400;
+  color: rgba(245,240,232,0.8); line-height: 1.5;
+}
+.eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: #d4af37; margin-bottom: 16px;
+}
+.small-text {
+  font-size: 11px; color: rgba(245,240,232,0.5);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-top: 18px; font-weight: 400;
+}
+
+/* Animation classes */
+.anim-fade-up { opacity: 0; transform: translateY(24px); }
+.anim-fade-up.go { animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) forwards; }
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+.anim-fade-in { opacity: 0; }
+.anim-fade-in.go { animation: fadeIn 1.2s ease forwards; }
+@keyframes fadeIn { to { opacity: 1; } }
+
+.anim-slide-left { opacity: 0; transform: translateX(-30px); }
+.anim-slide-left.go { animation: slideLeft 0.9s cubic-bezier(0.22,1,0.36,1) forwards; }
+@keyframes slideLeft { to { opacity: 1; transform: translateX(0); } }
+
+/* Typewriter */
+.typewriter {
+  overflow: hidden; white-space: nowrap;
+  border-right: 2px solid #d4af37;
+  width: 0;
+}
+.typewriter.go { animation: typewriter 2.5s steps(22) forwards, blink 0.7s step-end infinite; }
+@keyframes typewriter { to { width: 100%; } }
+@keyframes blink { 50% { border-color: transparent; } }
+
+/* ============================================
+   SCENE 1: HERO — 遮罩文字 + 粒子
+   ============================================ */
+.hero-mask-text {
+  position: absolute; top: 38%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-family: 'Playfair Display', serif;
+  font-size: 48px; font-weight: 700;
+  letter-spacing: 1px; text-align: center;
+  background: linear-gradient(180deg, rgba(245,240,232,0.95) 0%, rgba(212,175,55,0.6) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  z-index: 10; line-height: 1.15;
+  opacity: 0;
+}
+.hero-mask-text.go { animation: heroTextIn 1.5s cubic-bezier(0.22,1,0.36,1) forwards; }
+@keyframes heroTextIn {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(0.9); letter-spacing: 8px; }
+  100% { opacity: 1; transform: translate(-50%,-50%) scale(1); letter-spacing: 1px; }
+}
+.hero-sub {
+  position: absolute; top: 56%; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px; font-style: italic;
+  color: rgba(245,240,232,0.7);
+  text-align: center; z-index: 10;
+  opacity: 0; white-space: nowrap;
+}
+.hero-sub.go { animation: fadeIn 1.2s ease 0.8s forwards; }
+#hero-particles { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+
+/* ============================================
+   SCENE 2: UNBOXING — 切片 + 打字机
+   ============================================ */
+.unbox-tag {
+  position: absolute; top: 60px; left: 28px; z-index: 10;
+  font-family: 'Inter', sans-serif; font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(245,240,232,0.6);
+  padding: 5px 12px; border: 1px solid rgba(245,240,232,0.2);
+  border-radius: 20px; opacity: 0;
+}
+.unbox-tag.go { animation: fadeIn 0.8s ease forwards; }
+
+/* ============================================
+   SCENE 3: LIFESTYLE — 胶片颗粒 + 场景标签
+   ============================================ */
+.film-grain {
+  position: absolute; inset: 0; z-index: 8; pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.scene-label {
+  position: absolute; top: 56px; left: 24px; z-index: 10;
+  background: rgba(245,240,232,0.92); color: #1a1714;
+  padding: 6px 16px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; opacity: 0;
+}
+.scene-label.go { animation: slideLeft 0.8s cubic-bezier(0.22,1,0.36,1) forwards; }
+.vignette {
+  position: absolute; inset: 0; z-index: 7; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(12,10,8,0.4) 100%);
+}
+
+/* ============================================
+   SCENE 4: MACRO — 规格标签
+   ============================================ */
+.macro-specs {
+  position: absolute; right: 20px; top: 30%; z-index: 10;
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+}
+.macro-spec {
+  background: rgba(12,10,8,0.75); backdrop-filter: blur(8px);
+  border: 1px solid rgba(212,175,55,0.25);
+  padding: 7px 14px; border-radius: 6px;
+  font-size: 11px; color: #f5f0e8; font-weight: 500;
+  letter-spacing: 0.3px; opacity: 0; transform: translateX(20px);
+}
+.macro-spec.go { animation: specSlide 0.6s cubic-bezier(0.22,1,0.36,1) forwards; }
+@keyframes specSlide { to { opacity: 1; transform: translateX(0); } }
+
+/* ============================================
+   SCENE 5: FLATLAY — 四角标签 + 价格掉落
+   ============================================ */
+.fl-spec {
+  position: absolute; z-index: 10;
+  background: rgba(245,240,232,0.95); color: #1a1714;
+  padding: 8px 16px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  opacity: 0; transform: scale(0.5);
+}
+.fl-spec.go { animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+@keyframes popIn { to { opacity: 1; transform: scale(1); } }
+.fl-spec.tl { top: 18%; left: 6%; }
+.fl-spec.tr { top: 18%; right: 6%; }
+.fl-spec.bl { bottom: 34%; left: 6%; }
+.fl-spec.br { bottom: 34%; right: 6%; }
+.price-badge {
+  position: absolute; top: 44%; left: 50%;
+  transform: translateX(-50%); z-index: 11;
+  background: linear-gradient(135deg, #d4af37, #f4e4bc);
+  color: #1a1714; padding: 14px 36px; border-radius: 40px;
+  font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700;
+  box-shadow: 0 6px 30px rgba(212,175,55,0.45);
+  opacity: 0;
+}
+.price-badge.go { animation: priceDrop 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+@keyframes priceDrop {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-50px); }
+  60% { opacity: 1; transform: translateX(-50%) translateY(6px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.price-badge .from { font-size: 14px; font-weight: 400; opacity: 0.7; font-family: 'Inter',sans-serif; }
+
+/* ============================================
+   SCENE 6: GIFT — 暖光遮罩 + REC + 情感台词
+   ============================================ */
+.warm-overlay {
+  position: absolute; inset: 0; z-index: 7; pointer-events: none;
+  background: linear-gradient(to top, rgba(255,170,80,0.2) 0%, transparent 55%);
+}
+.timestamp {
+  position: absolute; top: 56px; left: 24px; z-index: 10;
+  font-family: 'Courier New', monospace; font-size: 11px;
+  color: rgba(245,240,232,0.75); letter-spacing: 1px;
+  opacity: 0;
+}
+.timestamp.go { animation: fadeIn 0.8s ease forwards; }
+.rec-dot {
+  display: inline-block; width: 7px; height: 7px;
+  background: #ff3b30; border-radius: 50%; margin-right: 7px;
+  animation: blink 1.2s ease-in-out infinite; vertical-align: middle;
+}
+.gift-line {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; font-weight: 400; font-style: italic;
+  color: #f5f0e8; line-height: 1.5;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+  opacity: 0; margin-bottom: 6px;
+}
+.gift-line.go { animation: fadeUp 1.2s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ============================================
+   SCENE 7: CTA — 纯UI构建
+   ============================================ */
+.cta-scene {
+  background: linear-gradient(165deg, #14110e 0%, #1f1a14 45%, #14110e 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 30px; text-align: center;
+}
+#cta-particles { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.cta-content { position: relative; z-index: 5; }
+.cta-eyebrow {
+  font-family: 'Inter', sans-serif; font-size: 10px;
+  letter-spacing: 5px; text-transform: uppercase;
+  color: #d4af37; margin-bottom: 20px; opacity: 0;
+}
+.cta-eyebrow.go { animation: fadeIn 1s ease forwards; }
+.cta-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px; font-weight: 600; color: #f5f0e8;
+  line-height: 1.2; margin-bottom: 10px; opacity: 0;
+}
+.cta-title.go { animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) forwards; }
+.cta-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px; font-style: italic;
+  color: rgba(245,240,232,0.65); margin-bottom: 24px; opacity: 0;
+}
+.cta-subtitle.go { animation: fadeIn 1.2s ease 0.3s forwards; }
+.cta-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px; font-weight: 700; color: #d4af37;
+  margin-bottom: 6px; opacity: 0;
+}
+.cta-price.go { animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) 0.5s forwards; }
+.cta-price .from { font-size: 16px; font-weight: 400; color: rgba(212,175,55,0.6); font-family:'Inter',sans-serif; }
+.cta-stars {
+  color: #d4af37; font-size: 14px; margin-bottom: 4px; opacity: 0;
+}
+.cta-stars.go { animation: fadeIn 1s ease 0.8s forwards; }
+.cta-stars .txt { color: rgba(245,240,232,0.5); margin-left: 6px; font-size: 12px; }
+.cta-urgency {
+  font-size: 11px; color: rgba(245,240,232,0.45);
+  letter-spacing: 0.5px; margin-bottom: 32px; opacity: 0;
+}
+.cta-urgency.go { animation: fadeIn 1s ease 1s forwards; }
+.cta-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #d4af37, #e8d5a0);
+  color: #1a1714; padding: 16px 52px; border-radius: 50px;
+  font-size: 14px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; text-decoration: none; border: none;
+  box-shadow: 0 4px 30px rgba(212,175,55,0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer; opacity: 0;
+  animation: btnPulse 2.8s ease-in-out 1.5s infinite;
+}
+.cta-btn.go { animation: btnIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 1.2s forwards, btnPulse 2.8s ease-in-out 2.2s infinite; }
+@keyframes btnIn { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+@keyframes btnPulse { 0%,100% { box-shadow: 0 4px 30px rgba(212,175,55,0.4); } 50% { box-shadow: 0 4px 50px rgba(212,175,55,0.7); } }
+.cta-btn:hover { transform: scale(1.06); }
+.cta-btn:active { transform: scale(0.97); }
+.cta-link {
+  display: block; margin-top: 20px;
+  font-size: 12px; color: rgba(245,240,232,0.4);
+  text-decoration: none; letter-spacing: 0.5px; opacity: 0;
+  transition: color 0.2s;
+}
+.cta-link.go { animation: fadeIn 1s ease 1.6s forwards; }
+.cta-link:hover { color: #d4af37; }
+.cta-features {
+  margin-top: 30px; display: flex; gap: 18px;
+  font-size: 10px; color: rgba(245,240,232,0.35);
+  letter-spacing: 0.5px; opacity: 0;
+}
+.cta-features.go { animation: fadeIn 1s ease 1.9s forwards; }
+.cta-features span { display: flex; align-items: center; gap: 4px; }
+
+/* ============================================
+   CONTROLS
+   ============================================ */
+.controls {
+  position: absolute; bottom: 18px; right: 16px;
+  z-index: 100; display: flex; gap: 8px;
+}
+.ctrl-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(12,10,8,0.5); backdrop-filter: blur(10px);
+  border: 1px solid rgba(245,240,232,0.12);
+  color: #f5f0e8; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease;
+}
+.ctrl-btn:hover { background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.3); }
+.ctrl-btn:active { transform: scale(0.92); }
+.ctrl-btn.music-on { background: rgba(212,175,55,0.25); border-color: rgba(212,175,55,0.5); color: #d4af37; }
+
+.scene-dots {
+  position: absolute; bottom: 24px; left: 50%;
+  transform: translateX(-50%); display: flex; gap: 5px; z-index: 50;
+}
+.scene-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(245,240,232,0.25); transition: all 0.4s ease;
+}
+.scene-dot.active { background: #d4af37; width: 16px; border-radius: 3px; }
+
+.tap-hint {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 50px; color: rgba(245,240,232,0.7);
+  z-index: 200; opacity: 0; pointer-events: none;
+}
+.tap-hint.show { animation: tapFade 0.9s ease forwards; }
+@keyframes tapFade {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
+  30% { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(1); }
+}
+
+/* Brand mark — subtle corner */
+.brand-mark {
+  position: absolute; bottom: 18px; left: 20px; z-index: 50;
+  font-family: 'Playfair Display', serif; font-size: 11px;
+  color: rgba(245,240,232,0.3); letter-spacing: 2px;
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<div class="phone-wrapper">
+<div class="phone-frame" id="phoneFrame">
+
+  <!-- Progress Bar -->
+  <div class="progress-container" id="progressContainer"></div>
+
+  <!-- Slice Transition Overlay -->
+  <div class="slice-overlay" id="sliceOverlay">
+    <div class="slice"></div><div class="slice"></div><div class="slice"></div>
+    <div class="slice"></div><div class="slice"></div><div class="slice"></div>
+  </div>
+
+  <!-- Tap hint -->
+  <div class="tap-hint" id="tapHint">⏸</div>
+
+  <!-- ==================== SCENE 1: HERO ==================== -->
+  <div class="scene" id="scene-0">
+    <div class="scene-bg ken-burns-slow" style="background-image:url('images/01-hero-dark.jpg');"></div>
+    <canvas id="hero-particles"></canvas>
+    <div class="hero-mask-text" id="heroText">The gift<br>she'll never<br>forget</div>
+    <div class="hero-sub" id="heroSub">A Slovenian coin, worn close to the heart.</div>
+  </div>
+
+  <!-- ==================== SCENE 2: UNBOXING ==================== -->
+  <div class="scene" id="scene-1">
+    <div class="scene-bg ken-burns-in" style="background-image:url('images/02-unboxing.jpg');"></div>
+    <div class="unbox-tag" data-anim="unbox-tag">The Unboxing</div>
+    <div class="text-bottom">
+      <div class="eyebrow anim-fade-in" data-anim="eyebrow">Not merely jewellery</div>
+      <div class="headline anim-fade-up" data-anim="headline">A story<br>you can wear.</div>
+      <div class="subhead anim-fade-in" data-anim="subhead">Genuine Slovenian 1 Tolar · Retired from circulation, 2007</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCENE 3: LIFESTYLE ==================== -->
+  <div class="scene" id="scene-2">
+    <div class="scene-bg ken-burns-slow" style="background-image:url('images/03-lifestyle-cafe.jpg');"></div>
+    <div class="vignette"></div>
+    <div class="film-grain"></div>
+    <div class="scene-label" data-anim="scene-label">London · Tuesday Morning</div>
+    <div class="text-bottom">
+      <div class="headline anim-fade-up" data-anim="headline">Dainty enough<br>for every day.</div>
+      <div class="subhead anim-fade-in" data-anim="subhead">Meaningful enough to matter.</div>
+      <div class="small-text anim-fade-in" data-anim="small-text">Hypoallergenic · Tarnish-resistant · Nickel-free</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCENE 4: MACRO DETAIL ==================== -->
+  <div class="scene" id="scene-3">
+    <div class="scene-bg ken-burns-in" style="background-image:url('images/05-macro-detail.jpg');"></div>
+    <div class="macro-specs">
+      <div class="macro-spec" data-anim="spec1">Nickel Brass · 78% Cu</div>
+      <div class="macro-spec" data-anim="spec2">22mm · 4.5g</div>
+      <div class="macro-spec" data-anim="spec3">Minted 1992–2006</div>
+      <div class="macro-spec" data-anim="spec4">Demonetised Jan 2007</div>
+    </div>
+    <div class="text-bottom" style="padding-bottom:50px;">
+      <div class="headline gold anim-fade-up" data-anim="headline">This is not<br>a replica.</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCENE 5: FLATLAY ==================== -->
+  <div class="scene" id="scene-4">
+    <div class="scene-bg ken-burns-in" style="background-image:url('images/04-flatlay.jpg');"></div>
+    <div class="fl-spec tl" data-anim="fl1">✓ Genuine Coin</div>
+    <div class="fl-spec tr" data-anim="fl2">✓ Gold-plated Chain</div>
+    <div class="fl-spec bl" data-anim="fl3">✓ Hypoallergenic</div>
+    <div class="fl-spec br" data-anim="fl4">✓ Tarnish-resistant</div>
+    <div class="price-badge" data-anim="price"><span class="from">from</span> £29.9</div>
+    <div class="text-bottom" style="padding-bottom:30px;">
+      <div class="small-text anim-fade-in" data-anim="small">Free UK delivery · 30-day returns · Luxury gift box included</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCENE 6: GIFT GIVING ==================== -->
+  <div class="scene" id="scene-5">
+    <div class="scene-bg ken-burns-slow" style="background-image:url('images/06-gift-giving.jpg');"></div>
+    <div class="warm-overlay"></div>
+    <div class="timestamp" data-anim="timestamp"><span class="rec-dot"></span>ANNIVERSARY · 7:42 PM · REC</div>
+    <div class="text-center" style="top:32%;">
+      <div class="gift-line" data-anim="g1">The gift that makes her cry.</div>
+      <div class="gift-line" data-anim="g2">Not because it's expensive.</div>
+      <div class="gift-line" data-anim="g3">Because it's hers.</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCENE 7: CTA ==================== -->
+  <div class="scene cta-scene" id="scene-6">
+    <canvas id="cta-particles"></canvas>
+    <div class="cta-content">
+      <div class="cta-eyebrow" data-anim="cta-eyebrow">GlobalFun Go</div>
+      <div class="cta-title" data-anim="cta-title">The Slovenian<br>Trout Necklace</div>
+      <div class="cta-subtitle" data-anim="cta-subtitle">Three fish. One love story.</div>
+      <div class="cta-price" data-anim="cta-price"><span class="from">from</span> £29.9</div>
+      <div class="cta-stars" data-anim="cta-stars">★★★★★<span class="txt">5.0 · Handmade in the UK</span></div>
+      <div class="cta-urgency" data-anim="cta-urgency">Limited stock · Each coin is one of a kind</div>
+      <a href="#" class="cta-btn" data-anim="cta-btn" onclick="return false;">Shop Now</a>
+      <a href="#" class="cta-link" data-anim="cta-link" onclick="return false;">View on Etsy →</a>
+      <div class="cta-features" data-anim="cta-features">
+        <span>🚚 Free UK delivery</span>
+        <span>↩ 30-day returns</span>
+        <span>🌿 Hypoallergenic</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brand mark -->
+  <div class="brand-mark">GlobalFun Go</div>
+
+  <!-- Scene dots -->
+  <div class="scene-dots" id="sceneDots"></div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="ctrl-btn" id="musicBtn" title="Music on/off">🎵</button>
+    <button class="ctrl-btn" id="playPauseBtn" title="Play / Pause">⏸</button>
+    <button class="ctrl-btn" id="replayBtn" title="Replay">↻</button>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ============================================
+// CONFIG — 7 scenes, British pacing
+// ============================================
+const DURATIONS = [2500, 3200, 2800, 3200, 2800, 3200, 999999];
+const TOTAL = 7;
+
+// ============================================
+// STATE
+// ============================================
+let current = 0;
+let playing = true;
+let sceneTimer = null;
+let progTimer = null;
+let sceneStart = 0;
+
+// ============================================
+// DOM
+// ============================================
+const scenes = document.querySelectorAll('.scene');
+const progContainer = document.getElementById('progressContainer');
+const dotsContainer = document.getElementById('sceneDots');
+const playBtn = document.getElementById('playPauseBtn');
+const replayBtn = document.getElementById('replayBtn');
+const musicBtn = document.getElementById('musicBtn');
+const tapHint = document.getElementById('tapHint');
+const phoneFrame = document.getElementById('phoneFrame');
+const sliceOverlay = document.getElementById('sliceOverlay');
+
+// Init progress + dots
+for (let i = 0; i < TOTAL; i++) {
+  const seg = document.createElement('div');
+  seg.className = 'progress-seg';
+  seg.innerHTML = '<div class="progress-seg-fill"></div>';
+  progContainer.appendChild(seg);
+  const dot = document.createElement('div');
+  dot.className = 'scene-dot' + (i === 0 ? ' active' : '');
+  dotsContainer.appendChild(dot);
+}
+const progSegs = document.querySelectorAll('.progress-seg');
+const dots = document.querySelectorAll('.scene-dot');
+
+// ============================================
+// SCENE ANIMATION TRIGGERS
+// ============================================
+function triggerAnimations(sceneIdx) {
+  const scene = scenes[sceneIdx];
+  const animEls = scene.querySelectorAll('[data-anim]');
+  animEls.forEach(el => {
+    el.classList.remove('go');
+    void el.offsetWidth;
+  });
+
+  // Scene-specific timing
+  const delays = {
+    0: { heroText: 300, heroSub: 700 },
+    1: { 'unbox-tag': 200, eyebrow: 500, headline: 800, subhead: 1500 },
+    2: { 'scene-label': 200, headline: 700, subhead: 1300, 'small-text': 1900 },
+    3: { spec1: 400, spec2: 700, spec3: 1000, spec4: 1300, headline: 1900 },
+    4: { fl1: 300, fl2: 500, fl3: 700, fl4: 900, price: 1400, small: 2100 },
+    5: { timestamp: 200, g1: 600, g2: 1200, g3: 1800 },
+    6: { 'cta-eyebrow': 150, 'cta-title': 350, 'cta-subtitle': 600, 'cta-price': 850, 'cta-stars': 1100, 'cta-urgency': 1350, 'cta-btn': 1650, 'cta-link': 2000, 'cta-features': 2200 }
+  };
+
+  const sceneDelays = delays[sceneIdx] || {};
+  animEls.forEach(el => {
+    const key = el.dataset.anim;
+    const delay = sceneDelays[key] || 500;
+    setTimeout(() => {
+      if (current !== sceneIdx || !playing) return;
+      el.classList.add('go');
+    }, delay);
+  });
+
+  // Hero text special
+  if (sceneIdx === 0) {
+    setTimeout(() => { if(current===0) document.getElementById('heroText').classList.add('go'); }, 300);
+    setTimeout(() => { if(current===0) document.getElementById('heroSub').classList.add('go'); }, 750);
+  }
+}
+
+// ============================================
+// SLICE TRANSITION
+// ============================================
+function runSliceTransition(callback) {
+  sliceOverlay.classList.remove('reveal');
+  void sliceOverlay.offsetWidth;
+  // Slices cover screen
+  setTimeout(() => {
+    callback();
+    setTimeout(() => {
+      sliceOverlay.classList.add('reveal');
+    }, 100);
+  }, 50);
+}
+
+// ============================================
+// GO TO SCENE
+// ============================================
+function goToScene(idx) {
+  if (idx < 0 || idx >= TOTAL) return;
+  clearTimeout(sceneTimer);
+  clearInterval(progTimer);
+
+  // Slice transition for scene changes (not first load)
+  if (idx !== current) {
+    runSliceTransition(() => {
+      scenes.forEach(s => s.classList.remove('active'));
+      progSegs.forEach((s, i) => {
+        s.classList.remove('complete');
+        s.querySelector('.progress-seg-fill').style.width = i < idx ? '100%' : '0%';
+      });
+      dots.forEach(d => d.classList.remove('active'));
+      current = idx;
+      scenes[idx].classList.add('active');
+      dots[idx].classList.add('active');
+      triggerAnimations(idx);
+      startProgress(idx);
+    });
+  } else {
+    scenes[idx].classList.add('active');
+    triggerAnimations(idx);
+    startProgress(idx);
+  }
+}
+
+function startProgress(idx) {
+  sceneStart = Date.now();
+  const dur = DURATIONS[idx];
+  if (dur >= 999999) {
+    progSegs[idx].querySelector('.progress-seg-fill').style.width = '100%';
+    return;
+  }
+  progTimer = setInterval(() => {
+    if (!playing) return;
+    const elapsed = Date.now() - sceneStart;
+    const pct = Math.min((elapsed / dur) * 100, 100);
+    progSegs[idx].querySelector('.progress-seg-fill').style.width = pct + '%';
+  }, 60);
+  sceneTimer = setTimeout(() => {
+    progSegs[idx].classList.add('complete');
+    if (idx < TOTAL - 1) goToScene(idx + 1);
+  }, dur);
+}
+
+// ============================================
+// PARTICLE SYSTEM — Gold dust
+// ============================================
+function initParticles(canvasId, count, speed) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const parent = canvas.parentElement;
+  canvas.width = parent.offsetWidth;
+  canvas.height = parent.offsetHeight;
+
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 0.5,
+      dx: (Math.random() - 0.5) * speed,
+      dy: -Math.random() * speed - 0.15,
+      alpha: Math.random() * 0.5 + 0.15,
+      pulse: Math.random() * Math.PI * 2
+    });
+  }
+
+  let rafId;
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.dx;
+      p.y += p.dy;
+      p.pulse += 0.025;
+      if (p.y < -5) { p.y = canvas.height + 5; p.x = Math.random() * canvas.width; }
+      if (p.x < -5) p.x = canvas.width + 5;
+      if (p.x > canvas.width + 5) p.x = -5;
+      const a = p.alpha * (0.5 + 0.5 * Math.sin(p.pulse));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(212,175,55,${a})`;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(212,175,55,0.6)';
+      ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+    rafId = requestAnimationFrame(animate);
+  }
+  animate();
+  return () => cancelAnimationFrame(rafId);
+}
+
+// ============================================
+// AMBIENT MUSIC — Web Audio API generator
+// ============================================
+let audioCtx = null;
+let musicPlaying = false;
+let musicNodes = [];
+let musicInterval = null;
+
+// C minor pentatonic — warm, melancholic, elegant
+const NOTES = [130.81, 155.56, 174.61, 196.00, 233.08, 261.63, 311.13, 349.23];
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function playNote(freq, duration, startTime, gainVal) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+
+  filter.type = 'lowpass';
+  filter.frequency.value = 1200;
+  filter.Q.value = 0.5;
+
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(gainVal, startTime + 0.08);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.1);
+  musicNodes.push(osc, gain, filter);
+}
+
+function playPad(freq, duration, startTime) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  osc2.type = 'sine';
+  osc2.frequency.value = freq * 1.5;
+  osc2.detune.value = 5;
+
+  filter.type = 'lowpass';
+  filter.frequency.value = 600;
+
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(0.06, startTime + 1.5);
+  gain.gain.setValueAtTime(0.06, startTime + duration - 1.5);
+  gain.gain.linearRampToValueAtTime(0.001, startTime + duration);
+
+  osc.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start(startTime);
+  osc2.start(startTime);
+  osc.stop(startTime + duration + 0.1);
+  osc2.stop(startTime + duration + 0.1);
+  musicNodes.push(osc, osc2, gain, filter);
+}
+
+function musicLoop() {
+  if (!audioCtx || !musicPlaying) return;
+  const now = audioCtx.currentTime;
+  const barLen = 4.0;
+
+  // Warm pad chord — C minor (C, Eb, G)
+  playPad(130.81, barLen * 2, now);
+  playPad(155.56, barLen * 2, now + 0.3);
+
+  // Melody notes — gentle, sparse
+  const melody = [0, 2, 4, 3, 5, 4, 2, 1];
+  melody.forEach((idx, i) => {
+    const noteFreq = NOTES[idx] * 2;
+    playNote(noteFreq, 1.8, now + i * 0.5, 0.04);
+  });
+
+  // High sparkle notes
+  setTimeout(() => {
+    if (musicPlaying && audioCtx) {
+      playNote(NOTES[6] * 4, 2.5, audioCtx.currentTime, 0.02);
+    }
+  }, 2000);
+}
+
+function startMusic() {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  musicPlaying = true;
+  musicBtn.classList.add('music-on');
+  musicBtn.textContent = '🎵';
+  musicLoop();
+  musicInterval = setInterval(musicLoop, 8000);
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  musicBtn.classList.remove('music-on');
+  musicBtn.textContent = '🔇';
+  if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
+  // Fade out existing nodes
+  musicNodes.forEach(n => {
+    try {
+      if (n.gain) n.gain.setTargetAtTime(0, audioCtx.currentTime, 0.3);
+      if (n.stop) n.stop(audioCtx.currentTime + 0.5);
+    } catch(e) {}
+  });
+  musicNodes = [];
+}
+
+function toggleMusic() {
+  if (musicPlaying) stopMusic();
+  else startMusic();
+}
+
+// ============================================
+// CONTROLS
+// ============================================
+function togglePlay() {
+  playing = !playing;
+  playBtn.textContent = playing ? '⏸' : '▶';
+  if (playing) {
+    const elapsed = Date.now() - sceneStart;
+    const remaining = DURATIONS[current] - elapsed;
+    if (remaining > 0 && remaining < 999999) {
+      clearTimeout(sceneTimer);
+      sceneTimer = setTimeout(() => {
+        progSegs[current].classList.add('complete');
+        if (current < TOTAL - 1) goToScene(current + 1);
+      }, remaining);
+    }
+  } else {
+    clearTimeout(sceneTimer);
+    clearInterval(progTimer);
+  }
+}
+
+function replay() {
+  goToScene(0);
+  playing = true;
+  playBtn.textContent = '⏸';
+}
+
+playBtn.addEventListener('click', e => { e.stopPropagation(); togglePlay(); });
+replayBtn.addEventListener('click', e => { e.stopPropagation(); replay(); });
+musicBtn.addEventListener('click', e => { e.stopPropagation(); toggleMusic(); });
+
+// Tap to pause
+phoneFrame.addEventListener('click', e => {
+  if (e.target.closest('.ctrl-btn') || e.target.closest('.cta-btn') || e.target.closest('.cta-link')) return;
+  togglePlay();
+  tapHint.classList.remove('show');
+  tapHint.textContent = playing ? '⏸' : '▶';
+  void tapHint.offsetWidth;
+  tapHint.classList.add('show');
+});
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && current < TOTAL - 1) goToScene(current + 1);
+  if (e.key === 'ArrowLeft' && current > 0) goToScene(current - 1);
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+  if (e.key === 'r' || e.key === 'R') replay();
+});
+
+// Touch swipe
+let touchX = 0;
+phoneFrame.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+phoneFrame.addEventListener('touchend', e => {
+  const diff = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(diff) > 55) {
+    if (diff < 0 && current < TOTAL - 1) goToScene(current + 1);
+    if (diff > 0 && current > 0) goToScene(current - 1);
+  }
+}, { passive: true });
+
+// Resize
+window.addEventListener('resize', () => {
+  ['hero-particles','cta-particles'].forEach(id => {
+    const c = document.getElementById(id);
+    if (c) { c.width = c.parentElement.offsetWidth; c.height = c.parentElement.offsetHeight; }
+  });
+});
+
+// ============================================
+// START
+// ============================================
+let musicStarted = false;
+function tryStartMusic() {
+  if (!musicStarted) {
+    musicStarted = true;
+    startMusic();
+  }
+}
+// Auto-start on first user interaction (browser autoplay policy)
+document.addEventListener('click', tryStartMusic, { once: true });
+document.addEventListener('touchstart', tryStartMusic, { once: true });
+document.addEventListener('keydown', tryStartMusic, { once: true });
+
+window.addEventListener('load', () => {
+  // Init particles for hero and CTA
+  initParticles('hero-particles', 40, 0.35);
+  initParticles('cta-particles', 25, 0.25);
+  setTimeout(() => goToScene(0), 400);
+  // Try to start music (may be blocked until interaction)
+  setTimeout(tryStartMusic, 800);
+});
+</script>
+
+</body>
+</html>
