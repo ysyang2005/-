@@ -112,7 +112,7 @@ html, body {
 .progress-seg.complete .progress-seg-fill { width: 100%; }
 
 /* ============================================
-   SCENE LABEL — 极简场景名
+   SCENE LABEL — Minimal scene name
    ============================================ */
 .scene-label {
   position: absolute; bottom: 62px; left: 50%;
@@ -129,6 +129,75 @@ html, body {
 @keyframes fadeIn { to { opacity: 1; } }
 
 /* ============================================
+   EMOTION TEXT — Poetic narrative layer
+   ============================================ */
+.emotion-layer {
+  position: absolute; inset: 0; z-index: 8;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  padding: 0 28px 108px;
+  pointer-events: none;
+}
+.emotion-layer::before {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 55%;
+  background: linear-gradient(to top, rgba(8,6,4,0.85) 0%, rgba(8,6,4,0.4) 50%, transparent 100%);
+  pointer-events: none;
+}
+.emotion-layer.top {
+  justify-content: flex-start;
+  padding-top: 78px;
+  padding-bottom: 0;
+}
+.emotion-layer.top::before {
+  top: 0; bottom: auto;
+  height: 30%;
+  background: linear-gradient(to bottom, rgba(8,6,4,0.6) 0%, transparent 100%);
+}
+.emotion-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: 31px; font-weight: 500; font-style: italic;
+  color: #ffffff;
+  line-height: 1.3;
+  text-align: center;
+  text-shadow: 0 2px 30px rgba(0,0,0,0.9), 0 0 60px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.8);
+  opacity: 0;
+  margin-bottom: 12px;
+  position: relative; z-index: 1;
+}
+.emotion-headline.gold { color: #f0d68a; }
+.emotion-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px; font-style: italic; font-weight: 500;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.5;
+  text-align: center;
+  text-shadow: 0 1px 18px rgba(0,0,0,0.85), 0 0 30px rgba(0,0,0,0.5);
+  opacity: 0;
+  max-width: 88%;
+  position: relative; z-index: 1;
+}
+.emotion-whisper {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; font-style: italic; font-weight: 500;
+  color: rgba(255,255,255,0.82);
+  letter-spacing: 1.5px;
+  text-align: center;
+  text-shadow: 0 1px 14px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5);
+  opacity: 0;
+  position: relative; z-index: 1;
+}
+
+/* Emotion animations */
+.anim-emotion-in { opacity: 0; transform: translateY(18px); }
+.anim-emotion-in.go { animation: emotionIn 1s cubic-bezier(0.22,1,0.36,1) forwards; }
+@keyframes emotionIn { to { opacity: 1; transform: translateY(0); } }
+.anim-emotion-fade { opacity: 0; }
+.anim-emotion-fade.go { animation: emotionFade 1.2s ease forwards; }
+@keyframes emotionFade { to { opacity: 1; } }
+
+/* ============================================
    PARTICLE CANVAS
    ============================================ */
 .particle-canvas {
@@ -136,7 +205,7 @@ html, body {
 }
 
 /* ============================================
-   VIGNETTE — 暗角增强电影感
+   VIGNETTE — Cinematic edge darkening
    ============================================ */
 .vignette {
   position: absolute; inset: 0; z-index: 6; pointer-events: none;
@@ -218,21 +287,33 @@ html, body {
   <div class="scene" id="scene-0">
     <div class="scene-bg ken-burns-slow" style="background-image:url('images/01-the-stream.jpg');"></div>
     <div class="vignette"></div>
-    <div class="scene-label" data-anim="label">The Stream · 起源</div>
+    <div class="emotion-layer">
+      <div class="emotion-headline gold anim-emotion-in" data-anim="e-head">Where it all began.</div>
+      <div class="emotion-sub anim-emotion-fade" data-anim="e-sub">In the cold, clear streams of the Julian Alps.</div>
+    </div>
+    <div class="scene-label" data-anim="label">The Stream</div>
   </div>
 
   <!-- ==================== SCENE 2: THE ARCHIVE ==================== -->
   <div class="scene" id="scene-1">
     <div class="scene-bg ken-burns-in" style="background-image:url('images/02-the-archive.jpg');"></div>
     <div class="vignette"></div>
-    <div class="scene-label" data-anim="label">The Archive · 印记</div>
+    <div class="emotion-layer">
+      <div class="emotion-headline anim-emotion-in" data-anim="e-head">Minted 1992. Retired 2007.</div>
+      <div class="emotion-sub anim-emotion-fade" data-anim="e-sub">No more will ever be made.</div>
+    </div>
+    <div class="scene-label" data-anim="label">The Archive</div>
   </div>
 
   <!-- ==================== SCENE 3: MORNING LIGHT ==================== -->
   <div class="scene" id="scene-2">
     <div class="scene-bg ken-burns-slow" style="background-image:url('images/03-morning-light.jpg');"></div>
     <div class="vignette"></div>
-    <div class="scene-label" data-anim="label">Morning Light · 日常</div>
+    <div class="emotion-layer">
+      <div class="emotion-headline anim-emotion-in" data-anim="e-head">Quiet mornings.</div>
+      <div class="emotion-sub anim-emotion-fade" data-anim="e-sub">Gentle reminders of someone who cares.</div>
+    </div>
+    <div class="scene-label" data-anim="label">Morning Light</div>
   </div>
 
   <!-- ==================== SCENE 4: THE PROMISE ==================== -->
@@ -240,21 +321,31 @@ html, body {
     <div class="scene-bg ken-burns-in" style="background-image:url('images/04-the-promise.jpg');"></div>
     <canvas class="particle-canvas" id="particles-4"></canvas>
     <div class="vignette"></div>
-    <div class="scene-label" data-anim="label">The Promise · 守护</div>
+    <div class="emotion-layer top">
+      <div class="emotion-whisper anim-emotion-fade" data-anim="e-whisper">A mother's love, never letting go.</div>
+    </div>
+    <div class="scene-label" data-anim="label">The Promise</div>
   </div>
 
   <!-- ==================== SCENE 5: THE GIFT ==================== -->
   <div class="scene" id="scene-4">
     <div class="scene-bg ken-burns-slow" style="background-image:url('images/05-the-gift.jpg');"></div>
     <div class="vignette"></div>
-    <div class="scene-label" data-anim="label">The Gift · 送礼</div>
+    <div class="emotion-layer">
+      <div class="emotion-headline gold anim-emotion-in" data-anim="e-head">The moment she opens it.</div>
+      <div class="emotion-sub anim-emotion-fade" data-anim="e-sub">Not because it's expensive. Because it's hers.</div>
+    </div>
+    <div class="scene-label" data-anim="label">The Gift</div>
   </div>
 
   <!-- ==================== SCENE 6: WHISPER ==================== -->
   <div class="scene" id="scene-5">
     <div class="scene-bg ken-burns-in" style="background-image:url('images/06-whisper.jpg');"></div>
     <div class="vignette"></div>
-    <div class="scene-label" data-anim="label">Whisper · 贴近</div>
+    <div class="emotion-layer top">
+      <div class="emotion-whisper anim-emotion-fade" data-anim="e-whisper">Where feelings live.</div>
+    </div>
+    <div class="scene-label" data-anim="label">Whisper</div>
   </div>
 
   <!-- ==================== SCENE 7: ETERNAL ==================== -->
@@ -262,7 +353,10 @@ html, body {
     <div class="scene-bg" style="background-image:url('images/07-eternal.jpg');"></div>
     <canvas class="particle-canvas" id="particles-7"></canvas>
     <div class="vignette"></div>
-    <div class="scene-label" data-anim="label">Eternal · 永恒</div>
+    <div class="emotion-layer top">
+      <div class="emotion-whisper anim-emotion-fade" data-anim="e-whisper">Forever. Always.</div>
+    </div>
+    <div class="scene-label" data-anim="label">Eternal</div>
   </div>
 
   <!-- Brand mark -->
@@ -285,7 +379,7 @@ html, body {
 // ============================================
 // CONFIG — 7 scenes, contemplative pacing
 // ============================================
-const DURATIONS = [3000, 3000, 3000, 3500, 3000, 3000, 999999];
+const DURATIONS = [4200, 4200, 4200, 4500, 4200, 4200, 999999];
 const TOTAL = 7;
 
 // ============================================
@@ -333,11 +427,26 @@ function triggerAnimations(sceneIdx) {
     el.classList.remove('go');
     void el.offsetWidth;
   });
+
+  // Scene-specific emotion text timing
+  const emotionDelays = {
+    0: { 'e-head': 300, 'e-sub': 750, 'label': 1400 },
+    1: { 'e-head': 300, 'e-sub': 750, 'label': 1400 },
+    2: { 'e-head': 300, 'e-sub': 750, 'label': 1400 },
+    3: { 'e-whisper': 350, 'label': 1000 },
+    4: { 'e-head': 300, 'e-sub': 800, 'label': 1500 },
+    5: { 'e-whisper': 350, 'label': 1000 },
+    6: { 'e-whisper': 350, 'label': 1000 }
+  };
+
+  const sceneDelays = emotionDelays[sceneIdx] || {};
   animEls.forEach(el => {
+    const key = el.dataset.anim;
+    const delay = sceneDelays[key] || 600;
     setTimeout(() => {
       if (current !== sceneIdx || !playing) return;
       el.classList.add('go');
-    }, 600);
+    }, delay);
   });
 }
 
