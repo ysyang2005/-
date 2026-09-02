@@ -1,768 +1,1004 @@
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>The Trout's Journey — A Slovenian Coin Necklace</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>The Trout's Promise — Frames 1-2</title>
 <style>
-/* ============================================
-   RESET & BASE
-   ============================================ */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html, body {
-  width: 100%; height: 100%;
-  background: #0a0806;
-  font-family: 'Inter', -apple-system, sans-serif;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-  color: #f5f0e8;
-}
+  /* ============================================
+     RESET & FULLSCREEN
+     ============================================ */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 
-/* ============================================
-   PHONE FRAME
-   ============================================ */
-.phone-wrapper {
-  position: fixed; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at 50% 40%, #16120d 0%, #0a0806 70%);
-}
-.phone-frame {
-  position: relative;
-  width: 100%; height: 100%;
-  max-width: 430px; max-height: 932px;
-  background: #000;
-  overflow: hidden;
-  border-radius: 0;
-  box-shadow: 0 0 80px rgba(212,175,55,0.06);
-}
-@media (min-width: 500px) {
-  .phone-frame { border-radius: 40px; border: 6px solid #15110d; }
-}
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
 
-/* ============================================
-   SCENE SYSTEM
-   ============================================ */
-.scene {
-  position: absolute; inset: 0;
-  opacity: 0; visibility: hidden;
-  transition: opacity 1s cubic-bezier(0.4,0,0.2,1), visibility 1s;
-  overflow: hidden;
-}
-.scene.active { opacity: 1; visibility: visible; }
-.scene-bg {
-  position: absolute; inset: 0;
-  background-size: cover; background-position: center;
-  background-repeat: no-repeat;
-}
+  /* ============================================
+     PLAYER CONTAINER — safe-area-inset 适配
+     ============================================ */
+  #player {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    background: #000;
+    overflow: hidden;
+  }
 
-/* Ken Burns */
-.ken-burns-slow { animation: kenBurnsSlow 9s ease-in-out forwards; }
-.ken-burns-in { animation: kenBurnsIn 7s ease-out forwards; }
-@keyframes kenBurnsIn {
-  0% { transform: scale(1.12) translate(1.5%,1%); opacity: 0; }
-  10% { opacity: 1; }
-  100% { transform: scale(1.01) translate(0,0); opacity: 1; }
-}
-@keyframes kenBurnsSlow {
-  0% { transform: scale(1) translate(0,0); }
-  100% { transform: scale(1.08) translate(-1%,-0.8%); }
-}
+  /* ============================================
+     LAYER 1: 背景图 (子帧2)
+     ============================================ */
+  #bgLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
 
-/* ============================================
-   SLICE TRANSITION
-   ============================================ */
-.slice-overlay {
-  position: absolute; inset: 0; z-index: 50;
-  display: flex; pointer-events: none;
-}
-.slice {
-  flex: 1; background: #0a0806;
-  transform: scaleY(1);
-  transition: transform 0.7s cubic-bezier(0.77,0,0.175,1);
-}
-.slice:nth-child(odd) { transform-origin: top; }
-.slice:nth-child(even) { transform-origin: bottom; }
-.slice-overlay.reveal .slice { transform: scaleY(0); }
-.slice-overlay.reveal .slice:nth-child(1) { transition-delay: 0s; }
-.slice-overlay.reveal .slice:nth-child(2) { transition-delay: 0.05s; }
-.slice-overlay.reveal .slice:nth-child(3) { transition-delay: 0.1s; }
-.slice-overlay.reveal .slice:nth-child(4) { transition-delay: 0.15s; }
-.slice-overlay.reveal .slice:nth-child(5) { transition-delay: 0.2s; }
-.slice-overlay.reveal .slice:nth-child(6) { transition-delay: 0.25s; }
+  .bg-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    filter: blur(14px) brightness(0.45) saturate(0.7);
+    transform: scale(1) translate(0%, 0%);
+    transition: opacity 1.6s ease, filter 1.6s ease, transform var(--motion-duration, 4s) ease-in-out;
+    will-change: opacity, filter, transform;
+  }
 
-/* ============================================
-   PROGRESS BAR
-   ============================================ */
-.progress-container {
-  position: absolute; top: 14px; left: 16px; right: 16px;
-  display: flex; gap: 5px; z-index: 100;
-}
-.progress-seg {
-  flex: 1; height: 2px;
-  background: rgba(245,240,232,0.15);
-  border-radius: 2px; overflow: hidden;
-}
-.progress-seg-fill {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, #d4af37, #f4e4bc);
-  border-radius: 2px;
-  transition: width 0.1s linear;
-}
-.progress-seg.complete .progress-seg-fill { width: 100%; }
+  .bg-frame.active {
+    opacity: 1;
+    filter: blur(0) brightness(1) saturate(1);
+  }
 
-/* ============================================
-   SCENE LABEL — Minimal scene name
-   ============================================ */
-.scene-label {
-  position: absolute; bottom: 62px; left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Inter', sans-serif;
-  font-size: 12px; font-weight: 500;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: rgba(245,240,232,0.85);
-  text-shadow: 0 1px 8px rgba(0,0,0,0.7), 0 0 20px rgba(0,0,0,0.4);
-  z-index: 10; opacity: 0;
-  white-space: nowrap;
-}
-.scene-label.go { animation: fadeIn 1.5s ease 0.5s forwards; }
-@keyframes fadeIn { to { opacity: 1; } }
+  /* 图片加载失败占位 */
+  .bg-placeholder {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1a1510 0%, #0d0b08 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(245,240,232,0.2);
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
 
-/* ============================================
-   EMOTION TEXT — Poetic narrative layer
-   ============================================ */
-.emotion-layer {
-  position: absolute; inset: 0; z-index: 8;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-end;
-  padding: 0 28px 108px;
-  pointer-events: none;
-}
-.emotion-layer::before {
-  content: '';
-  position: absolute; left: 0; right: 0; bottom: 0;
-  height: 55%;
-  background: linear-gradient(to top, rgba(8,6,4,0.85) 0%, rgba(8,6,4,0.4) 50%, transparent 100%);
-  pointer-events: none;
-}
-.emotion-layer.top {
-  justify-content: flex-start;
-  padding-top: 78px;
-  padding-bottom: 0;
-}
-.emotion-layer.top::before {
-  top: 0; bottom: auto;
-  height: 30%;
-  background: linear-gradient(to bottom, rgba(8,6,4,0.6) 0%, transparent 100%);
-}
-.emotion-headline {
-  font-family: 'Playfair Display', serif;
-  font-size: 31px; font-weight: 500; font-style: italic;
-  color: #ffffff;
-  line-height: 1.3;
-  text-align: center;
-  text-shadow: 0 2px 30px rgba(0,0,0,0.9), 0 0 60px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.8);
-  opacity: 0;
-  margin-bottom: 12px;
-  position: relative; z-index: 1;
-}
-.emotion-headline.gold { color: #f0d68a; }
-.emotion-sub {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 18px; font-style: italic; font-weight: 500;
-  color: rgba(255,255,255,0.92);
-  line-height: 1.5;
-  text-align: center;
-  text-shadow: 0 1px 18px rgba(0,0,0,0.85), 0 0 30px rgba(0,0,0,0.5);
-  opacity: 0;
-  max-width: 88%;
-  position: relative; z-index: 1;
-}
-.emotion-whisper {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 15px; font-style: italic; font-weight: 500;
-  color: rgba(255,255,255,0.82);
-  letter-spacing: 1.5px;
-  text-align: center;
-  text-shadow: 0 1px 14px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5);
-  opacity: 0;
-  position: relative; z-index: 1;
-}
+  /* ============================================
+     雨粒子 (子帧2)
+     ============================================ */
+  .rain-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background-image: linear-gradient(transparent 50%, rgba(255,255,255,0.03) 50%);
+    background-size: 100% 4px;
+    animation: rainFall 0.8s linear infinite;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.0s ease;
+  }
 
-/* Emotion animations */
-.anim-emotion-in { opacity: 0; transform: translateY(18px); }
-.anim-emotion-in.go { animation: emotionIn 1s cubic-bezier(0.22,1,0.36,1) forwards; }
-@keyframes emotionIn { to { opacity: 1; transform: translateY(0); } }
-.anim-emotion-fade { opacity: 0; }
-.anim-emotion-fade.go { animation: emotionFade 1.2s ease forwards; }
-@keyframes emotionFade { to { opacity: 1; } }
+  .rain-overlay.active {
+    opacity: 0.25;
+  }
 
-/* ============================================
-   PARTICLE CANVAS
-   ============================================ */
-.particle-canvas {
-  position: absolute; inset: 0; z-index: 5; pointer-events: none;
-}
+  @keyframes rainFall {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 4px; }
+  }
 
-/* ============================================
-   VIGNETTE — Cinematic edge darkening
-   ============================================ */
-.vignette {
-  position: absolute; inset: 0; z-index: 6; pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 55%, rgba(10,8,6,0.35) 100%);
-}
+  /* ============================================
+     硬币3D翻转动画 (Panel 3, CSS实现)
+     ============================================ */
+  .bg-frame.flip-right {
+    animation: flipRight 4.5s ease-in-out forwards;
+    transform-style: preserve-3d;
+    perspective: 1200px;
+  }
 
-/* ============================================
-   CONTROLS
-   ============================================ */
-.controls {
-  position: absolute; bottom: 16px; right: 14px;
-  z-index: 100; display: flex; gap: 6px;
-}
-.ctrl-btn {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: rgba(10,8,6,0.4); backdrop-filter: blur(8px);
-  border: 1px solid rgba(245,240,232,0.1);
-  color: rgba(245,240,232,0.7); font-size: 12px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s ease;
-}
-.ctrl-btn:hover { background: rgba(212,175,55,0.15); border-color: rgba(212,175,55,0.25); color: #d4af37; }
-.ctrl-btn:active { transform: scale(0.92); }
-.ctrl-btn.music-on { background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.4); color: #d4af37; }
+  .bg-frame.flip-left {
+    animation: flipLeft 4.0s ease-in-out forwards;
+    transform-style: preserve-3d;
+    perspective: 1200px;
+  }
 
-/* Scene dots */
-.scene-dots {
-  position: absolute; bottom: 22px; left: 50%;
-  transform: translateX(-50%); display: flex; gap: 4px; z-index: 50;
-}
-.scene-dot {
-  width: 4px; height: 4px; border-radius: 50%;
-  background: rgba(245,240,232,0.2); transition: all 0.4s ease;
-}
-.scene-dot.active { background: #d4af37; width: 14px; border-radius: 3px; }
+  @keyframes flipRight {
+    0%   { transform: scale(1.07) rotateY(0deg)   rotateX(0deg); }
+    20%  { transform: scale(1.08) rotateY(10deg)  rotateX(1deg); }
+    40%  { transform: scale(1.095) rotateY(16deg) rotateX(2deg); }
+    60%  { transform: scale(1.105) rotateY(8deg)  rotateX(1deg); }
+    80%  { transform: scale(1.115) rotateY(3deg)  rotateX(0deg); }
+    100% { transform: scale(1.12)  rotateY(0deg)   rotateX(0deg); }
+  }
 
-/* Tap hint */
-.tap-hint {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  font-size: 40px; color: rgba(245,240,232,0.6);
-  z-index: 200; opacity: 0; pointer-events: none;
-}
-.tap-hint.show { animation: tapFade 0.8s ease forwards; }
-@keyframes tapFade {
-  0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
-  30% { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
-  100% { opacity: 0; transform: translate(-50%,-50%) scale(1); }
-}
+  @keyframes flipLeft {
+    0%   { transform: scale(1.12)  rotateY(0deg)    rotateX(0deg); }
+    20%  { transform: scale(1.13)  rotateY(-10deg)  rotateX(-1deg); }
+    40%  { transform: scale(1.14)  rotateY(-16deg)  rotateX(-2deg); }
+    60%  { transform: scale(1.145) rotateY(-8deg)   rotateX(-1deg); }
+    80%  { transform: scale(1.15)  rotateY(-3deg)   rotateX(0deg); }
+    100% { transform: scale(1.15)  rotateY(0deg)    rotateX(0deg); }
+  }
 
-/* Brand mark */
-.brand-mark {
-  position: absolute; bottom: 18px; left: 18px; z-index: 50;
-  font-family: 'Playfair Display', serif; font-size: 11px;
-  color: rgba(245,240,232,0.5); letter-spacing: 2px;
-  text-transform: uppercase;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
-}
+  /* ============================================
+     场景标签 (顶部)
+     ============================================ */
+  #sceneLabel {
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + 48px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    z-index: 6;
+    opacity: 0;
+    pointer-events: none;
+    text-align: center;
+    transition: opacity 1.2s ease;
+  }
+
+  #sceneLabel.visible {
+    opacity: 1;
+  }
+
+  /* ============================================
+     字幕层 (子帧3起)
+     ============================================ */
+  #subtitleLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding-bottom: calc(18% + env(safe-area-inset-bottom));
+  }
+
+  .subtitle-line {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    text-align: center;
+    color: rgba(245,240,232,0.92);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.7), 0 0 30px rgba(0,0,0,0.4);
+    letter-spacing: 0.5px;
+    opacity: 0;
+    transform: translateY(12px);
+    max-width: 85%;
+    line-height: 1.5;
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+
+  .subtitle-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .subtitle-line.line-1 { font-size: 18px; }
+  .subtitle-line.line-2 { font-size: 16px; color: rgba(245,240,232,0.75); margin-top: 6px; }
+
+  /* ============================================
+     硬币辉光 (子帧4起)
+     ============================================ */
+  .coin-glow {
+    position: absolute;
+    bottom: 22%;
+    right: 18%;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      rgba(212,175,55,0.5) 0%,
+      rgba(212,175,55,0.15) 40%,
+      transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+    transition: opacity 0.5s ease;
+  }
+
+  .coin-glow.active {
+    animation: glowPulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.95); }
+    50% { opacity: 0.7; transform: scale(1.08); }
+  }
+
+  /* ============================================
+     滑动提示 (子帧4起)
+     ============================================ */
+  #swipeHint {
+    position: absolute;
+    bottom: calc(env(safe-area-inset-bottom) + 24px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0;
+    z-index: 20;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+
+  #swipeHint.visible {
+    animation: hintAppear 0.6s ease forwards, hintBounce 2s ease-in-out 0.6s infinite;
+  }
+
+  @keyframes hintAppear {
+    0% { opacity: 0; }
+    100% { opacity: 0.5; }
+  }
+
+  @keyframes hintBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-6px); }
+  }
+
+  /* ============================================
+     子帧1: 黑色渐入
+     ============================================ */
+  #blackFade {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: #000;
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  #blackFade.fading {
+    animation: blackFadeIn 0.5s ease forwards;
+  }
+
+  @keyframes blackFadeIn {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* ============================================
+     帧标签
+     ============================================ */
+  #frameLabel {
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: rgba(245,240,232,0.25);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    text-align: center;
+  }
+
+  #frameLabel.visible {
+    opacity: 1;
+  }
+
+  /* ============================================
+     开始遮罩
+     ============================================ */
+  #startOverlay {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.8s ease;
+  }
+
+  #startOverlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .start-title {
+    font-family: 'Georgia', serif;
+    font-size: 24px;
+    font-style: italic;
+    color: rgba(244,228,188,0.9);
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+    text-align: center;
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+
+  @keyframes titlePulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  .start-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: rgba(245,240,232,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 30px;
+    background: transparent;
+    animation: btnGlow 2.5s ease-in-out infinite;
+  }
+
+  @keyframes btnGlow {
+    0%, 100% { box-shadow: 0 0 0 rgba(212,175,55,0); }
+    50% { box-shadow: 0 0 20px rgba(212,175,55,0.15); }
+  }
+
+  .start-hint {
+    margin-top: 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: rgba(245,240,232,0.25);
+    letter-spacing: 1px;
+  }
+
+  /* ============================================
+     重播按钮
+     ============================================ */
+  #replayBtn {
+    position: absolute;
+    bottom: calc(env(safe-area-inset-bottom) + 24px);
+    right: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(212,175,55,0.2);
+    color: rgba(245,240,232,0.4);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    opacity: 0;
+    transition: opacity 0.5s ease, background 0.2s ease;
+  }
+
+  #replayBtn.visible {
+    opacity: 1;
+  }
+
+  #replayBtn:hover {
+    background: rgba(212,175,55,0.15);
+    border-color: rgba(212,175,55,0.4);
+    color: rgba(244,228,188,0.8);
+  }
 </style>
 </head>
 <body>
 
-<div class="phone-wrapper">
-<div class="phone-frame" id="phoneFrame">
+<div id="player">
 
-  <!-- Progress Bar -->
-  <div class="progress-container" id="progressContainer"></div>
-
-  <!-- Slice Transition Overlay -->
-  <div class="slice-overlay" id="sliceOverlay">
-    <div class="slice"></div><div class="slice"></div><div class="slice"></div>
-    <div class="slice"></div><div class="slice"></div><div class="slice"></div>
+  <!-- LAYER 1: 背景图 -->
+  <div id="bgLayer">
+    <div class="bg-frame" id="bgFrame2" style="background-image: url('images/1.jpg')"></div>
+    <div class="bg-frame" id="bgFrame3" style="background-image: url('images/2.jpg')"></div>
+    <div class="bg-frame" id="bgFrame4" style="background-image: url('images/3.jpg')"></div>
+    <div class="bg-frame" id="bgFrame5" style="background-image: url('images/4.jpg')"></div>
+    <div class="bg-frame" id="bgFrame6" style="background-image: url('images/5.jpg')"></div>
+    <div class="bg-frame" id="bgFrame7" style="background-image: url('images/5.jpg')"></div>
   </div>
 
-  <!-- Tap hint -->
-  <div class="tap-hint" id="tapHint">⏸</div>
-
-  <!-- ==================== SCENE 1: THE STREAM ==================== -->
-  <div class="scene" id="scene-0">
-    <div class="scene-bg ken-burns-slow" style="background-image:url('images/01-the-stream.jpg');"></div>
-    <div class="vignette"></div>
-    <div class="emotion-layer">
-      <div class="emotion-headline gold anim-emotion-in" data-anim="e-head">Where it all began.</div>
-      <div class="emotion-sub anim-emotion-fade" data-anim="e-sub">In the cold, clear streams of the Julian Alps.</div>
-    </div>
-    <div class="scene-label" data-anim="label">The Stream</div>
+  <!-- LAYER 1: 背景图 -->
+  <div id="bgLayer">
+    <div class="bg-frame" id="bgFrame2" style="background-image: url('images/1.jpg')"></div>
+    <div class="bg-frame" id="bgFrame3" style="background-image: url('images/2.jpg')"></div>
+    <div class="bg-frame" id="bgFrame4" style="background-image: url('images/3.jpg')"></div>
+    <div class="bg-frame" id="bgFrame5" style="background-image: url('images/4.jpg')"></div>
+    <div class="bg-frame" id="bgFrame6" style="background-image: url('images/5.jpg')"></div>
+    <div class="bg-frame" id="bgFrame7" style="background-image: url('images/5.jpg')"></div>
+    <div class="bg-frame" id="bgFrame8" style="background-image: url('images/6.jpg')"></div>
+    <div class="bg-frame" id="bgFrame9" style="background-image: url('images/6.jpg')"></div>
   </div>
 
-  <!-- ==================== SCENE 2: THE ARCHIVE ==================== -->
-  <div class="scene" id="scene-1">
-    <div class="scene-bg ken-burns-in" style="background-image:url('images/02-the-archive.jpg');"></div>
-    <div class="vignette"></div>
-    <div class="emotion-layer">
-      <div class="emotion-headline anim-emotion-in" data-anim="e-head">Minted 1992. Retired 2007.</div>
-      <div class="emotion-sub anim-emotion-fade" data-anim="e-sub">No more will ever be made.</div>
-    </div>
-    <div class="scene-label" data-anim="label">The Archive</div>
+  <!-- 雨粒子 -->
+  <div class="rain-overlay" id="rainOverlay"></div>
+
+  <!-- 硬币辉光 -->
+  <div class="coin-glow" id="coinGlow"></div>
+
+  <!-- 场景标签 -->
+  <div id="sceneLabel"></div>
+
+  <!-- 字幕层 -->
+  <div id="subtitleLayer">
+    <div class="subtitle-line line-1" id="subLine1"></div>
+    <div class="subtitle-line line-2" id="subLine2"></div>
   </div>
 
-  <!-- ==================== SCENE 3: MORNING LIGHT ==================== -->
-  <div class="scene" id="scene-2">
-    <div class="scene-bg ken-burns-slow" style="background-image:url('images/03-morning-light.jpg');"></div>
-    <div class="vignette"></div>
-    <div class="emotion-layer">
-      <div class="emotion-headline anim-emotion-in" data-anim="e-head">Quiet mornings.</div>
-      <div class="emotion-sub anim-emotion-fade" data-anim="e-sub">Gentle reminders of someone who cares.</div>
-    </div>
-    <div class="scene-label" data-anim="label">Morning Light</div>
-  </div>
+  <!-- 滑动提示 -->
+  <div id="swipeHint">↑ Swipe up</div>
 
-  <!-- ==================== SCENE 4: THE PROMISE ==================== -->
-  <div class="scene" id="scene-3">
-    <div class="scene-bg ken-burns-in" style="background-image:url('images/04-the-promise.jpg');"></div>
-    <canvas class="particle-canvas" id="particles-4"></canvas>
-    <div class="vignette"></div>
-    <div class="emotion-layer top">
-      <div class="emotion-whisper anim-emotion-fade" data-anim="e-whisper">A mother's love, never letting go.</div>
-    </div>
-    <div class="scene-label" data-anim="label">The Promise</div>
-  </div>
+  <!-- 子帧1: 黑色渐入 -->
+  <div id="blackFade"></div>
 
-  <!-- ==================== SCENE 5: THE GIFT ==================== -->
-  <div class="scene" id="scene-4">
-    <div class="scene-bg ken-burns-slow" style="background-image:url('images/05-the-gift.jpg');"></div>
-    <div class="vignette"></div>
-    <div class="emotion-layer">
-      <div class="emotion-headline gold anim-emotion-in" data-anim="e-head">The moment she opens it.</div>
-      <div class="emotion-sub anim-emotion-fade" data-anim="e-sub">Not because it's expensive. Because it's hers.</div>
-    </div>
-    <div class="scene-label" data-anim="label">The Gift</div>
-  </div>
+  <!-- 帧标签 -->
+  <div id="frameLabel">Frame 1 · Black Fade In</div>
 
-  <!-- ==================== SCENE 6: WHISPER ==================== -->
-  <div class="scene" id="scene-5">
-    <div class="scene-bg ken-burns-in" style="background-image:url('images/06-whisper.jpg');"></div>
-    <div class="vignette"></div>
-    <div class="emotion-layer top">
-      <div class="emotion-whisper anim-emotion-fade" data-anim="e-whisper">Where feelings live.</div>
-    </div>
-    <div class="scene-label" data-anim="label">Whisper</div>
-  </div>
+  <!-- 重播按钮 -->
+  <button id="replayBtn" title="Replay">↻</button>
 
-  <!-- ==================== SCENE 7: ETERNAL ==================== -->
-  <div class="scene" id="scene-6">
-    <div class="scene-bg" style="background-image:url('images/07-eternal.jpg');"></div>
-    <canvas class="particle-canvas" id="particles-7"></canvas>
-    <div class="vignette"></div>
-    <div class="emotion-layer top">
-      <div class="emotion-whisper anim-emotion-fade" data-anim="e-whisper">Forever. Always.</div>
-    </div>
-    <div class="scene-label" data-anim="label">Eternal</div>
-  </div>
-
-  <!-- Brand mark -->
-  <div class="brand-mark">GlobalFun Go</div>
-
-  <!-- Scene dots -->
-  <div class="scene-dots" id="sceneDots"></div>
-
-  <!-- Controls -->
-  <div class="controls">
-    <button class="ctrl-btn" id="musicBtn" title="Music on/off">🎵</button>
-    <button class="ctrl-btn" id="playPauseBtn" title="Play / Pause">⏸</button>
-    <button class="ctrl-btn" id="replayBtn" title="Replay">↻</button>
+  <!-- 开始遮罩 -->
+  <div id="startOverlay">
+    <div class="start-title">The Trout's Promise</div>
+    <button class="start-btn">Tap to Begin</button>
+    <div class="start-hint">9 Frames · Panel 1 (5) + Panel 2 (2) + Panel 3 CSS Flip (2)</div>
   </div>
 
 </div>
-</div>
+
+<!-- 背景音乐 -->
+<audio id="bgMusic" preload="auto" loop></audio>
 
 <script>
-// ============================================
-// CONFIG — 7 scenes, contemplative pacing
-// ============================================
-const DURATIONS = [4200, 4200, 4200, 4500, 4200, 4200, 999999];
-const TOTAL = 7;
+  // ============================================
+  // 子帧配置 (子帧1 + 子帧2)
+  // ============================================
+  const FRAMES = [
+    // 子帧1: 黑色渐入
+    {
+      id: 1,
+      title: 'Black Fade In',
+      duration: 500,        // 0.5秒
+      bg: null,             // 无背景图
+      music: null,          // 无音乐
+      sceneLabel: null,     // 无场景标签
+      subtitle1: null,
+      subtitle2: null,
+      rain: false,
+      kenBurns: false,
+      blackFade: true
+    },
+    // 子帧2: 伦敦复古市场全景 + 场景设定旁白
+    {
+      id: 2,
+      title: 'London Vintage Market',
+      duration: 4000,       // 4.0秒 (两行字幕需阅读时间)
+      bg: 'images/1.jpg',   // 背景图序列第1张
+      music: 'audio/1.mp3', // 音乐序列第1首 (雨声+钢琴)
+      musicVolume: 0.2,     // 音量20%
+      sceneLabel: 'Portobello Road · London',
+      subtitle1: 'On a rainy Saturday,',
+      subtitle2: 'she wandered past the antique stalls.',
+      rain: true,           // 雨粒子
+      kenBurns: true,       // Ken Burns推近
+      kbDuration: '5s',     // 推近时长5秒
+      blackFade: false
+    },
+    // 子帧3: 人物聚焦 + 情绪钩子第一行
+    {
+      id: 3,
+      title: 'Character Focus',
+      duration: 3500,       // 3.5秒 (悬念留白)
+      bg: 'images/2.jpg',   // 背景图序列第2张 (人物聚焦)
+      music: 'audio/1.mp3', // 继续同一首
+      musicVolume: 0.2,
+      sceneLabel: 'Portobello Road · London',
+      subtitle1: 'Some things are not found —',
+      subtitle2: null,
+      rain: true,
+      kenBurns: true,
+      kbDuration: '5s',
+      blackFade: false
+    },
+    // 子帧4: 手+真实硬币项链 + 完整钩子 + 硬币辉光 + 滑动提示
+    {
+      id: 4,
+      title: 'The Coin',
+      duration: 5000,       // 5.0秒 (情绪高潮+真实产品，充分感受)
+      bg: 'images/3.jpg',   // 背景图序列第3张 (真实产品照片)
+      music: 'audio/1.mp3', // 继续同一首
+      musicVolume: 0.2,
+      sceneLabel: 'Portobello Road · London',
+      subtitle1: 'Some things are not found —',
+      subtitle2: 'they find you.',
+      rain: true,
+      kenBurns: true,
+      kbDuration: '5s',
+      coinGlow: true,       // 硬币辉光启动
+      showSwipeHint: true,  // 滑动提示
+      blackFade: false
+    },
+    // 子帧5: 硬币极端特写 + 三条鳟鱼细节 + ting音效 + 情绪深化
+    {
+      id: 5,
+      title: 'Coin Close-up',
+      duration: 4000,       // 4.0秒 (极端特写，欣赏细节)
+      bg: 'images/4.jpg',   // 背景图序列第4张 (真实硬币极端特写)
+      music: 'audio/1.mp3', // 继续同一首
+      musicVolume: 0.15,    // 音乐略降，突出ting音效
+      sceneLabel: 'Portobello Road · London',
+      subtitle1: 'Three trout.',
+      subtitle2: 'One promise.',
+      rain: true,
+      kenBurns: true,
+      kbDuration: '5s',
+      coinGlow: true,       // 硬币辉光(更强烈)
+      showSwipeHint: true,
+      tingSound: true,      // 硬币轻响音效
+      blackFade: false
+    },
+    // ===== Panel 2: Discovery — A Strange Gold Coin =====
+    // 子帧6: 木盒+硬币+手伸向 + 旁白第一行
+    {
+      id: 6,
+      title: 'The Wooden Box',
+      duration: 4000,       // 4.0秒
+      bg: 'images/5.jpg',   // 背景图序列第5张 (木盒+真实硬币)
+      music: 'audio/1.mp3', // 继续同一首
+      musicVolume: 0.15,
+      sceneLabel: 'Portobello Road · London',
+      subtitle1: 'It was the only coin in the box',
+      subtitle2: null,
+      rain: true,
+      kenBurns: true,
+      kbDuration: '5s',
+      coinGlow: true,
+      showSwipeHint: true,
+      tingSound: false,
+      blackFade: false
+    },
+    // 子帧7: 完整旁白 + ting音效 + 辉光增强
+    {
+      id: 7,
+      title: 'Not Supposed to Be There',
+      duration: 4000,       // 4.0秒
+      bg: 'images/5.jpg',   // 同一张图，继续推近
+      music: 'audio/1.mp3', // 继续同一首
+      musicVolume: 0.15,
+      sceneLabel: 'Portobello Road · London',
+      subtitle1: 'It was the only coin in the box',
+      subtitle2: "that wasn't supposed to be there.",
+      rain: true,
+      kenBurns: true,
+      kbDuration: '5s',
+      coinGlow: true,
+      showSwipeHint: true,
+      tingSound: true,      // 第二声ting，呼应发现
+      blackFade: false
+    },
+    // ===== Panel 3: Close-up — Three Trout + Latin Inscription =====
+    // 子帧8: 硬币极端特写 + CSS右翻转动画 + 第一行旁白
+    {
+      id: 8,
+      title: 'Three Trout',
+      duration: 4500,       // 4.5秒
+      bg: 'images/6.jpg',   // 正面硬币特写
+      flipClass: 'flip-right', // CSS右翻转动画
+      music: 'audio/1.mp3',
+      musicVolume: 0.12,    // 音乐再降，突出细节
+      sceneLabel: 'The Coin · Up Close',
+      subtitle1: 'Three fish. One Latin name.',
+      subtitle2: null,
+      rain: false,          // 特写场景不需要雨
+      coinGlow: false,      // 硬币本身已经很亮
+      showSwipeHint: true,
+      tingSound: false,
+      blackFade: false
+    },
+    // 子帧9: 完整旁白 + CSS左翻转动画 + ting音效
+    {
+      id: 9,
+      title: 'A Promise in Metal',
+      duration: 4000,       // 4.0秒
+      bg: 'images/6.jpg',   // 正面硬币特写
+      flipClass: 'flip-left', // CSS左翻转动画
+      music: 'audio/1.mp3',
+      musicVolume: 0.12,
+      sceneLabel: 'The Coin · Up Close',
+      subtitle1: 'Three fish. One Latin name.',
+      subtitle2: 'A promise written in metal.',
+      rain: false,
+      coinGlow: false,
+      showSwipeHint: true,
+      tingSound: true,      // 第三声ting，金属承诺
+      blackFade: false
+    }
+  ];
 
-// ============================================
-// STATE
-// ============================================
-let current = 0;
-let playing = true;
-let sceneTimer = null;
-let progTimer = null;
-let sceneStart = 0;
+  // ============================================
+  // DOM 引用
+  // ============================================
+  const blackFade = document.getElementById('blackFade');
+  const bgFrame2 = document.getElementById('bgFrame2');
+  const bgFrame3 = document.getElementById('bgFrame3');
+  const bgFrame4 = document.getElementById('bgFrame4');
+  const bgFrame5 = document.getElementById('bgFrame5');
+  const bgFrame6 = document.getElementById('bgFrame6');
+  const bgFrame7 = document.getElementById('bgFrame7');
+  const bgFrame8 = document.getElementById('bgFrame8');
+  const bgFrame9 = document.getElementById('bgFrame9');
+  const rainOverlay = document.getElementById('rainOverlay');
+  const coinGlow = document.getElementById('coinGlow');
+  const sceneLabel = document.getElementById('sceneLabel');
+  const subLine1 = document.getElementById('subLine1');
+  const subLine2 = document.getElementById('subLine2');
+  const swipeHint = document.getElementById('swipeHint');
+  const frameLabel = document.getElementById('frameLabel');
+  const replayBtn = document.getElementById('replayBtn');
+  const startOverlay = document.getElementById('startOverlay');
+  const bgMusic = document.getElementById('bgMusic');
 
-// ============================================
-// DOM
-// ============================================
-const scenes = document.querySelectorAll('.scene');
-const progContainer = document.getElementById('progressContainer');
-const dotsContainer = document.getElementById('sceneDots');
-const playBtn = document.getElementById('playPauseBtn');
-const replayBtn = document.getElementById('replayBtn');
-const musicBtn = document.getElementById('musicBtn');
-const tapHint = document.getElementById('tapHint');
-const phoneFrame = document.getElementById('phoneFrame');
-const sliceOverlay = document.getElementById('sliceOverlay');
+  // ============================================
+  // 播放状态
+  // ============================================
+  let currentFrame = 0;
+  let isPlaying = false;
+  let frameTimer = null;
+  let currentBg = null;  // 跟踪当前显示的背景图，相同时不切换
 
-// Init progress + dots
-for (let i = 0; i < TOTAL; i++) {
-  const seg = document.createElement('div');
-  seg.className = 'progress-seg';
-  seg.innerHTML = '<div class="progress-seg-fill"></div>';
-  progContainer.appendChild(seg);
-  const dot = document.createElement('div');
-  dot.className = 'scene-dot' + (i === 0 ? ' active' : '');
-  dotsContainer.appendChild(dot);
-}
-const progSegs = document.querySelectorAll('.progress-seg');
-const dots = document.querySelectorAll('.scene-dot');
-
-// ============================================
-// SCENE ANIMATION TRIGGERS
-// ============================================
-function triggerAnimations(sceneIdx) {
-  const scene = scenes[sceneIdx];
-  const animEls = scene.querySelectorAll('[data-anim]');
-  animEls.forEach(el => {
-    el.classList.remove('go');
-    void el.offsetWidth;
-  });
-
-  // Scene-specific emotion text timing
-  const emotionDelays = {
-    0: { 'e-head': 300, 'e-sub': 750, 'label': 1400 },
-    1: { 'e-head': 300, 'e-sub': 750, 'label': 1400 },
-    2: { 'e-head': 300, 'e-sub': 750, 'label': 1400 },
-    3: { 'e-whisper': 350, 'label': 1000 },
-    4: { 'e-head': 300, 'e-sub': 800, 'label': 1500 },
-    5: { 'e-whisper': 350, 'label': 1000 },
-    6: { 'e-whisper': 350, 'label': 1000 }
+  // ============================================
+  // 镜头运动预设（多样化 + 连贯：下一帧起始=上一帧结束）
+  // ============================================
+  const MOTION_PRESETS = {
+    2: { startScale: 1.00, endScale: 1.05, startX: 0,  endX: -2, startY: 0,  endY: 0 },   // 推近+左移
+    3: { startScale: 1.05, endScale: 1.10, startX: -2, endX: 0,  startY: 0,  endY: 0 },   // 继续推近+回中
+    4: { startScale: 1.10, endScale: 1.06, startX: 0,  endX: 2,  startY: 0,  endY: 0 },   // 拉远+右移
+    5: { startScale: 1.06, endScale: 1.09, startX: 2,  endX: 1,  startY: 0,  endY: 0 },   // 轻微推近+回中
+    6: { startScale: 1.09, endScale: 1.03, startX: 1,  endX: 0,  startY: 0,  endY: -2 },  // 拉远+上移
+    7: { startScale: 1.03, endScale: 1.07, startX: 0,  endX: 0,  startY: -2, endY: 0 },   // 推近+回中
+    8: { startScale: 1.07, endScale: 1.12, startX: 0,  endX: 0,  startY: 0,  endY: 0 },   // 极慢推近(翻转)
+    9: { startScale: 1.12, endScale: 1.15, startX: 0,  endX: 0,  startY: 0,  endY: 0 },   // 极慢推近(翻转)
   };
 
-  const sceneDelays = emotionDelays[sceneIdx] || {};
-  animEls.forEach(el => {
-    const key = el.dataset.anim;
-    const delay = sceneDelays[key] || 600;
-    setTimeout(() => {
-      if (current !== sceneIdx || !playing) return;
-      el.classList.add('go');
-    }, delay);
-  });
-}
+  // ============================================
+  // 显示指定子帧
+  // ============================================
+  function showFrame(index) {
+    if (index < 0 || index >= FRAMES.length) return;
 
-// ============================================
-// SLICE TRANSITION
-// ============================================
-function runSliceTransition(callback) {
-  sliceOverlay.classList.remove('reveal');
-  void sliceOverlay.offsetWidth;
-  setTimeout(() => {
-    callback();
-    setTimeout(() => {
-      sliceOverlay.classList.add('reveal');
-    }, 80);
-  }, 50);
-}
+    const frame = FRAMES[index];
+    currentFrame = index;
 
-// ============================================
-// GO TO SCENE
-// ============================================
-function goToScene(idx) {
-  if (idx < 0 || idx >= TOTAL) return;
-  clearTimeout(sceneTimer);
-  clearInterval(progTimer);
-
-  if (idx !== current) {
-    runSliceTransition(() => {
-      scenes.forEach(s => s.classList.remove('active'));
-      progSegs.forEach((s, i) => {
-        s.classList.remove('complete');
-        s.querySelector('.progress-seg-fill').style.width = i < idx ? '100%' : '0%';
-      });
-      dots.forEach(d => d.classList.remove('active'));
-      current = idx;
-      scenes[idx].classList.add('active');
-      dots[idx].classList.add('active');
-      triggerAnimations(idx);
-      startProgress(idx);
-    });
-  } else {
-    scenes[idx].classList.add('active');
-    triggerAnimations(idx);
-    startProgress(idx);
-  }
-}
-
-function startProgress(idx) {
-  sceneStart = Date.now();
-  const dur = DURATIONS[idx];
-  if (dur >= 999999) {
-    progSegs[idx].querySelector('.progress-seg-fill').style.width = '100%';
-    return;
-  }
-  progTimer = setInterval(() => {
-    if (!playing) return;
-    const elapsed = Date.now() - sceneStart;
-    const pct = Math.min((elapsed / dur) * 100, 100);
-    progSegs[idx].querySelector('.progress-seg-fill').style.width = pct + '%';
-  }, 60);
-  sceneTimer = setTimeout(() => {
-    progSegs[idx].classList.add('complete');
-    if (idx < TOTAL - 1) goToScene(idx + 1);
-  }, dur);
-}
-
-// ============================================
-// PARTICLE SYSTEM — Gold dust
-// ============================================
-function initParticles(canvasId, count, speed) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const parent = canvas.parentElement;
-  canvas.width = parent.offsetWidth;
-  canvas.height = parent.offsetHeight;
-
-  const particles = [];
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.8 + 0.4,
-      dx: (Math.random() - 0.5) * speed,
-      dy: -Math.random() * speed - 0.12,
-      alpha: Math.random() * 0.45 + 0.12,
-      pulse: Math.random() * Math.PI * 2
-    });
-  }
-
-  let rafId;
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => {
-      p.x += p.dx;
-      p.y += p.dy;
-      p.pulse += 0.02;
-      if (p.y < -5) { p.y = canvas.height + 5; p.x = Math.random() * canvas.width; }
-      if (p.x < -5) p.x = canvas.width + 5;
-      if (p.x > canvas.width + 5) p.x = -5;
-      const a = p.alpha * (0.5 + 0.5 * Math.sin(p.pulse));
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(212,175,55,${a})`;
-      ctx.shadowBlur = 6;
-      ctx.shadowColor = 'rgba(212,175,55,0.5)';
-      ctx.fill();
-    });
-    ctx.shadowBlur = 0;
-    rafId = requestAnimationFrame(animate);
-  }
-  animate();
-  return () => cancelAnimationFrame(rafId);
-}
-
-// ============================================
-// AMBIENT MUSIC — Web Audio API
-// ============================================
-let audioCtx = null;
-let musicPlaying = false;
-let musicNodes = [];
-let musicInterval = null;
-
-// C minor pentatonic — warm, melancholic, elegant
-const NOTES = [130.81, 155.56, 174.61, 196.00, 233.08, 261.63, 311.13, 349.23];
-
-function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-}
-
-function playNote(freq, duration, startTime, gainVal) {
-  if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
-  osc.type = 'sine';
-  osc.frequency.value = freq;
-  filter.type = 'lowpass';
-  filter.frequency.value = 1200;
-  filter.Q.value = 0.5;
-  gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(gainVal, startTime + 0.08);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-  osc.connect(filter);
-  filter.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start(startTime);
-  osc.stop(startTime + duration + 0.1);
-  musicNodes.push(osc, gain, filter);
-}
-
-function playPad(freq, duration, startTime) {
-  if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const osc2 = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
-  osc.type = 'sine';
-  osc.frequency.value = freq;
-  osc2.type = 'sine';
-  osc2.frequency.value = freq * 1.5;
-  osc2.detune.value = 5;
-  filter.type = 'lowpass';
-  filter.frequency.value = 600;
-  gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(0.05, startTime + 1.5);
-  gain.gain.setValueAtTime(0.05, startTime + duration - 1.5);
-  gain.gain.linearRampToValueAtTime(0.001, startTime + duration);
-  osc.connect(filter);
-  osc2.connect(filter);
-  filter.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start(startTime);
-  osc2.start(startTime);
-  osc.stop(startTime + duration + 0.1);
-  osc2.stop(startTime + duration + 0.1);
-  musicNodes.push(osc, osc2, gain, filter);
-}
-
-function musicLoop() {
-  if (!audioCtx || !musicPlaying) return;
-  const now = audioCtx.currentTime;
-  const barLen = 4.0;
-  playPad(130.81, barLen * 2, now);
-  playPad(155.56, barLen * 2, now + 0.3);
-  const melody = [0, 2, 4, 3, 5, 4, 2, 1];
-  melody.forEach((idx, i) => {
-    const noteFreq = NOTES[idx] * 2;
-    playNote(noteFreq, 1.8, now + i * 0.5, 0.035);
-  });
-  setTimeout(() => {
-    if (musicPlaying && audioCtx) {
-      playNote(NOTES[6] * 4, 2.5, audioCtx.currentTime, 0.018);
+    // --- 黑色渐入 ---
+    if (frame.blackFade) {
+      blackFade.classList.remove('fading');
+      void blackFade.offsetWidth; // 强制重排
+      blackFade.classList.add('fading');
+      blackFade.style.opacity = ''; // 用动画控制
+    } else {
+      blackFade.classList.remove('fading');
+      blackFade.style.opacity = '0'; // 完全透明，显示背景
     }
-  }, 2000);
-}
 
-function startMusic() {
-  initAudio();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  musicPlaying = true;
-  musicBtn.classList.add('music-on');
-  musicBtn.textContent = '🎵';
-  musicLoop();
-  musicInterval = setInterval(musicLoop, 8000);
-}
+    // --- 硬币3D翻转 (Panel 3, CSS animation) ---
+    // 先清除所有flip class
+    bgFrame8.classList.remove('flip-right', 'flip-left');
+    bgFrame9.classList.remove('flip-right', 'flip-left');
 
-function stopMusic() {
-  musicPlaying = false;
-  musicBtn.classList.remove('music-on');
-  musicBtn.textContent = '🔇';
-  if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
-  musicNodes.forEach(n => {
+    // --- 背景图 ---
+    // 确定要显示的背景图元素（子帧6和7共用bgFrame6，避免背景切换）
+    let activeFrame = null;
+    if (frame.bg === 'images/1.jpg') activeFrame = bgFrame2;
+    else if (frame.bg === 'images/2.jpg') activeFrame = bgFrame3;
+    else if (frame.bg === 'images/3.jpg') activeFrame = bgFrame4;
+    else if (frame.bg === 'images/4.jpg') activeFrame = bgFrame5;
+    else if (frame.bg === 'images/5.jpg') activeFrame = bgFrame6; // 子帧6和7共用
+    else if (frame.bg === 'images/6.jpg') activeFrame = (frame.id === 8) ? bgFrame8 : bgFrame9;
+
+    // 如果背景图与当前不同，执行切换
+    if (frame.bg !== currentBg && activeFrame) {
+      bgFrame2.classList.remove('active');
+      bgFrame3.classList.remove('active');
+      bgFrame4.classList.remove('active');
+      bgFrame5.classList.remove('active');
+      bgFrame6.classList.remove('active');
+      bgFrame7.classList.remove('active');
+      bgFrame8.classList.remove('active');
+      bgFrame9.classList.remove('active');
+      activeFrame.classList.add('active');
+      currentBg = frame.bg;
+    }
+
+    // 添加CSS flip class (Panel 3, 跳过JS transform)
+    if (activeFrame && frame.flipClass) {
+      // 强制重排后添加flip class，确保animation从头播放
+      void activeFrame.offsetWidth;
+      activeFrame.classList.add(frame.flipClass);
+    }
+
+    // --- 镜头运动（多样化 + 连贯，不管背景是否切换都应用）---
+    // 有flipClass的帧用CSS animation控制transform，跳过JS设置
+    if (activeFrame && MOTION_PRESETS[frame.id] && !frame.flipClass) {
+      const m = MOTION_PRESETS[frame.id];
+      activeFrame.style.setProperty('--motion-duration', (frame.duration / 1000) + 's');
+      // 设置起始状态（禁用transition，立即生效）
+      activeFrame.style.transition = 'opacity 1.6s ease, filter 1.6s ease';
+      activeFrame.style.transform = `scale(${m.startScale}) translate(${m.startX}%, ${m.startY}%)`;
+      void activeFrame.offsetWidth; // 强制重排，确保起始状态生效
+      // 设置结束状态（恢复transition，触发平滑过渡）
+      activeFrame.style.transition = '';
+      activeFrame.style.transform = `scale(${m.endScale}) translate(${m.endX}%, ${m.endY}%)`;
+    }
+
+    // --- 雨粒子 ---
+    if (frame.rain) {
+      rainOverlay.classList.add('active');
+    } else {
+      rainOverlay.classList.remove('active');
+    }
+
+    // --- 硬币辉光 ---
+    if (frame.coinGlow) {
+      coinGlow.classList.add('active');
+    } else {
+      coinGlow.classList.remove('active');
+    }
+
+    // --- Ting音效 (硬币轻响) ---
+    if (frame.tingSound) {
+      setTimeout(() => playTingSound(), 400); // 转场后0.4s触发
+    }
+
+    // --- 场景标签 ---
+    if (frame.sceneLabel) {
+      sceneLabel.textContent = frame.sceneLabel;
+      sceneLabel.classList.add('visible');
+    } else {
+      sceneLabel.classList.remove('visible');
+      sceneLabel.textContent = '';
+    }
+
+    // --- 滑动提示 ---
+    if (frame.showSwipeHint) {
+      swipeHint.classList.add('visible');
+    } else {
+      swipeHint.classList.remove('visible');
+    }
+
+    // --- 字幕 ---
+    if (frame.subtitle1) {
+      subLine1.textContent = frame.subtitle1;
+      subLine1.classList.add('visible');
+    } else {
+      subLine1.classList.remove('visible');
+      subLine1.textContent = '';
+    }
+    if (frame.subtitle2) {
+      subLine2.textContent = frame.subtitle2;
+      subLine2.classList.add('visible');
+    } else {
+      subLine2.classList.remove('visible');
+      subLine2.textContent = '';
+    }
+
+    // --- 音乐 ---
+    if (frame.music) {
+      if (bgMusic.src !== frame.music || !bgMusic.src.includes(frame.music)) {
+        bgMusic.src = frame.music;
+        bgMusic.volume = frame.musicVolume || 0.2;
+        bgMusic.play().catch(() => {});
+      } else {
+        bgMusic.volume = frame.musicVolume || 0.2;
+      }
+    } else {
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
+    }
+
+    // --- 帧标签 ---
+    frameLabel.textContent = `Frame ${frame.id} · ${frame.title}`;
+    frameLabel.classList.add('visible');
+
+    // --- 重播按钮 ---
+    replayBtn.classList.remove('visible');
+
+    // --- 自动跳转 ---
+    clearTimeout(frameTimer);
+    if (index < FRAMES.length - 1) {
+      frameTimer = setTimeout(() => {
+        showFrame(index + 1);
+      }, frame.duration);
+    } else {
+      // 最后一帧：暂停，显示重播按钮
+      isPlaying = false;
+      setTimeout(() => {
+        replayBtn.classList.add('visible');
+      }, 500);
+    }
+  }
+
+  // ============================================
+  // 开始播放
+  // ============================================
+  function startPlayback() {
+    startOverlay.classList.add('hidden');
+    isPlaying = true;
+    currentFrame = 0;
+    showFrame(0);
+  }
+
+  // ============================================
+  // 重播
+  // ============================================
+  function replay() {
+    // 重置
+    currentBg = null;
+    bgFrame2.classList.remove('active');
+    bgFrame3.classList.remove('active');
+    bgFrame4.classList.remove('active');
+    bgFrame5.classList.remove('active');
+    bgFrame6.classList.remove('active');
+    bgFrame7.classList.remove('active');
+    bgFrame8.classList.remove('active', 'flip-right', 'flip-left');
+    bgFrame9.classList.remove('active', 'flip-right', 'flip-left');
+    // 重置所有背景图的transform
+    [bgFrame2, bgFrame3, bgFrame4, bgFrame5, bgFrame6, bgFrame7, bgFrame8, bgFrame9].forEach(el => {
+      el.style.transform = 'scale(1) translate(0%, 0%)';
+    });
+    rainOverlay.classList.remove('active');
+    coinGlow.classList.remove('active');
+    sceneLabel.classList.remove('visible');
+    sceneLabel.textContent = '';
+    swipeHint.classList.remove('visible');
+    subLine1.classList.remove('visible');
+    subLine1.textContent = '';
+    subLine2.classList.remove('visible');
+    subLine2.textContent = '';
+    blackFade.classList.remove('fading');
+    blackFade.style.opacity = '1';
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+    replayBtn.classList.remove('visible');
+
+    // 重新开始
+    setTimeout(() => {
+      isPlaying = true;
+      currentFrame = 0;
+      showFrame(0);
+    }, 300);
+  }
+
+  // ============================================
+  // 事件监听
+  // ============================================
+  startOverlay.addEventListener('click', startPlayback);
+  replayBtn.addEventListener('click', replay);
+
+  // 点击屏幕 = 下一帧 (播放中) 或 重播 (结束后)
+  document.getElementById('player').addEventListener('click', (e) => {
+    if (e.target.closest('#startOverlay') || e.target.closest('#replayBtn')) return;
+    if (isPlaying && currentFrame < FRAMES.length - 1) {
+      clearTimeout(frameTimer);
+      showFrame(currentFrame + 1);
+    } else if (!isPlaying) {
+      replay();
+    }
+  });
+
+  // 键盘控制
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      if (!startOverlay.classList.contains('hidden')) {
+        startPlayback();
+      } else if (!isPlaying) {
+        replay();
+      }
+    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (isPlaying && currentFrame < FRAMES.length - 1) {
+        clearTimeout(frameTimer);
+        showFrame(currentFrame + 1);
+      }
+    }
+  });
+
+  // ============================================
+  // Ting音效 — Web Audio API生成金属轻响
+  // ============================================
+  let audioCtx = null;
+
+  function playTingSound() {
     try {
-      if (n.gain) n.gain.setTargetAtTime(0, audioCtx.currentTime, 0.3);
-      if (n.stop) n.stop(audioCtx.currentTime + 0.5);
-    } catch(e) {}
-  });
-  musicNodes = [];
-}
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
 
-function toggleMusic() {
-  if (musicPlaying) stopMusic();
-  else startMusic();
-}
+      const now = audioCtx.currentTime;
 
-// ============================================
-// CONTROLS
-// ============================================
-function togglePlay() {
-  playing = !playing;
-  playBtn.textContent = playing ? '⏸' : '▶';
-  if (playing) {
-    const elapsed = Date.now() - sceneStart;
-    const remaining = DURATIONS[current] - elapsed;
-    if (remaining > 0 && remaining < 999999) {
-      clearTimeout(sceneTimer);
-      sceneTimer = setTimeout(() => {
-        progSegs[current].classList.add('complete');
-        if (current < TOTAL - 1) goToScene(current + 1);
-      }, remaining);
+      // 主音: 高频金属声 (2400Hz)
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(2400, now);
+      osc1.frequency.exponentialRampToValueAtTime(1800, now + 0.4);
+      gain1.gain.setValueAtTime(0, now);
+      gain1.gain.linearRampToValueAtTime(0.12, now + 0.01);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.6);
+
+      // 泛音: 更高频 (3600Hz)，增加金属质感
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(3600, now);
+      osc2.frequency.exponentialRampToValueAtTime(2800, now + 0.3);
+      gain2.gain.setValueAtTime(0, now);
+      gain2.gain.linearRampToValueAtTime(0.06, now + 0.008);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      osc2.start(now);
+      osc2.stop(now + 0.4);
+
+    } catch (e) {
+      console.log('Ting sound not available:', e.message);
     }
-  } else {
-    clearTimeout(sceneTimer);
-    clearInterval(progTimer);
   }
-}
 
-function replay() {
-  goToScene(0);
-  playing = true;
-  playBtn.textContent = '⏸';
-}
+  // ============================================
+  // 预加载素材
+  // ============================================
+  const preloadImg1 = new Image();
+  preloadImg1.src = 'images/1.jpg';
+  const preloadImg2 = new Image();
+  preloadImg2.src = 'images/2.jpg';
+  const preloadImg5 = new Image();
+  preloadImg5.src = 'images/5.jpg';
+  const preloadImg6 = new Image();
+  preloadImg6.src = 'images/6.jpg';
+  const preloadImg7 = new Image();
+  preloadImg7.src = 'images/7.jpg';
+  const preloadImg8 = new Image();
+  preloadImg8.src = 'images/8.jpg';
+  const preloadImg9 = new Image();
+  preloadImg9.src = 'images/9.jpg';
+  const preloadImg10 = new Image();
+  preloadImg10.src = 'images/10.jpg';
 
-playBtn.addEventListener('click', e => { e.stopPropagation(); togglePlay(); });
-replayBtn.addEventListener('click', e => { e.stopPropagation(); replay(); });
-musicBtn.addEventListener('click', e => { e.stopPropagation(); toggleMusic(); });
-
-// Tap to pause
-phoneFrame.addEventListener('click', e => {
-  if (e.target.closest('.ctrl-btn')) return;
-  togglePlay();
-  tapHint.classList.remove('show');
-  tapHint.textContent = playing ? '⏸' : '▶';
-  void tapHint.offsetWidth;
-  tapHint.classList.add('show');
-});
-
-// Keyboard
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' && current < TOTAL - 1) goToScene(current + 1);
-  if (e.key === 'ArrowLeft' && current > 0) goToScene(current - 1);
-  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
-  if (e.key === 'r' || e.key === 'R') replay();
-});
-
-// Touch swipe
-let touchX = 0;
-phoneFrame.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
-phoneFrame.addEventListener('touchend', e => {
-  const diff = e.changedTouches[0].clientX - touchX;
-  if (Math.abs(diff) > 55) {
-    if (diff < 0 && current < TOTAL - 1) goToScene(current + 1);
-    if (diff > 0 && current > 0) goToScene(current - 1);
-  }
-}, { passive: true });
-
-// Resize
-window.addEventListener('resize', () => {
-  ['particles-4','particles-7'].forEach(id => {
-    const c = document.getElementById(id);
-    if (c) { c.width = c.parentElement.offsetWidth; c.height = c.parentElement.offsetHeight; }
-  });
-});
-
-// ============================================
-// START
-// ============================================
-let musicStarted = false;
-function tryStartMusic() {
-  if (!musicStarted) {
-    musicStarted = true;
-    startMusic();
-  }
-}
-document.addEventListener('click', tryStartMusic, { once: true });
-document.addEventListener('touchstart', tryStartMusic, { once: true });
-document.addEventListener('keydown', tryStartMusic, { once: true });
-
-window.addEventListener('load', () => {
-  initParticles('particles-4', 35, 0.3);
-  initParticles('particles-7', 45, 0.25);
-  setTimeout(() => goToScene(0), 400);
-  setTimeout(tryStartMusic, 800);
-});
+  console.log('Frames loaded: Panel 1 (1-5) + Panel 2 (6-7) + Panel 3 (8-9 keyframe)');
+  console.log('Frame 8: 4.5s — Three Trout close-up + RIGHT rotation (5 keyframes) + "Three fish. One Latin name."');
+  console.log('Frame 9: 4.0s — A Promise in Metal + LEFT rotation (5 keyframes) + full narration + ting');
 </script>
 
 </body>

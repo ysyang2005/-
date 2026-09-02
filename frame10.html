@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Frame 10 — Time Story · 1992</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+
+  #player {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    background: #000;
+    overflow: hidden;
+  }
+
+  /* ===== 背景图层 ===== */
+  #bgLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .bg-frame {
+    position: absolute;
+    inset: 0;
+    width: 110%;
+    height: 100%;
+    left: -5%;
+    background-image: url('images/11.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    filter: blur(14px) brightness(0.45) saturate(0.7);
+    transform: scale(1.0) translateX(0%);
+    transition: opacity 1.6s ease, filter 1.6s ease, transform 1.5s ease-in-out;
+    will-change: opacity, filter, transform;
+  }
+
+  .bg-frame.active {
+    opacity: 1;
+    filter: blur(0) brightness(1) saturate(1);
+    transform: scale(1.02) translateX(-3%);
+  }
+
+  /* ===== 金色河流光效 ===== */
+  #riverGlow {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+
+  #riverGlow.active {
+    opacity: 1;
+  }
+
+  .river-band {
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(212,175,55,0.08) 15%,
+      rgba(212,175,55,0.2) 35%,
+      rgba(212,175,55,0.3) 50%,
+      rgba(212,175,55,0.2) 65%,
+      rgba(212,175,55,0.08) 85%,
+      transparent 100%);
+    animation: riverFlow 3s linear infinite;
+  }
+
+  @keyframes riverFlow {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(25%); }
+  }
+
+  /* ===== 时间轴 ===== */
+  #timeline {
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + 56px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    pointer-events: none;
+  }
+
+  .year {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(212,175,55,0);
+    letter-spacing: 2px;
+    text-shadow: 0 0 12px rgba(212,175,55,0.6);
+    transform: scale(0);
+    transition: color 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .year.visible {
+    color: rgba(212,175,55,0.95);
+    transform: scale(1);
+  }
+
+  .timeline-line {
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(212,175,55,0.8), rgba(212,175,55,0.3));
+    margin: 0 8px;
+    transition: width 0.7s ease-out;
+  }
+
+  .timeline-line.grown {
+    width: 80px;
+  }
+
+  /* ===== 黑色渐入 ===== */
+  #blackFade {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: #000;
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  #blackFade.fading {
+    animation: blackFadeIn 0.5s ease forwards;
+  }
+
+  @keyframes blackFadeIn {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* ===== 帧标签 ===== */
+  #frameLabel {
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: rgba(245,240,232,0.25);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    text-align: center;
+  }
+
+  #frameLabel.visible {
+    opacity: 1;
+  }
+
+  /* ===== 重播按钮 ===== */
+  #replayBtn {
+    position: absolute;
+    bottom: calc(env(safe-area-inset-bottom) + 24px);
+    right: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(212,175,55,0.2);
+    color: rgba(245,240,232,0.4);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    opacity: 0;
+    transition: opacity 0.5s ease, background 0.2s ease;
+  }
+
+  #replayBtn.visible {
+    opacity: 1;
+  }
+
+  #replayBtn:hover {
+    background: rgba(212,175,55,0.15);
+    border-color: rgba(212,175,55,0.4);
+    color: rgba(244,228,188,0.8);
+  }
+
+  /* ===== 开始遮罩 ===== */
+  #startOverlay {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.8s ease;
+  }
+
+  #startOverlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .start-title {
+    font-family: 'Georgia', serif;
+    font-size: 24px;
+    font-style: italic;
+    color: rgba(244,228,188,0.9);
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+    text-align: center;
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+
+  @keyframes titlePulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  .start-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: rgba(245,240,232,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 30px;
+    background: transparent;
+    animation: btnGlow 2.5s ease-in-out infinite;
+  }
+
+  @keyframes btnGlow {
+    0%, 100% { box-shadow: 0 0 0 rgba(212,175,55,0); }
+    50% { box-shadow: 0 0 20px rgba(212,175,55,0.15); }
+  }
+
+  .start-hint {
+    margin-top: 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: rgba(245,240,232,0.25);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div id="player">
+
+  <!-- 背景图 -->
+  <div id="bgLayer">
+    <div class="bg-frame" id="bgFrame"></div>
+  </div>
+
+  <!-- 金色河流光效 -->
+  <div id="riverGlow">
+    <div class="river-band"></div>
+  </div>
+
+  <!-- 时间轴 -->
+  <div id="timeline">
+    <span class="year" id="year1992">1992</span>
+    <div class="timeline-line" id="timelineLine"></div>
+    <span class="year" id="year2007" style="opacity:0.2;">2007</span>
+  </div>
+
+  <!-- 黑色渐入 -->
+  <div id="blackFade"></div>
+
+  <!-- 帧标签 -->
+  <div id="frameLabel">Frame 10 · Time Story · 1992</div>
+
+  <!-- 重播按钮 -->
+  <button id="replayBtn" title="Replay">↻</button>
+
+  <!-- 开始遮罩 -->
+  <div id="startOverlay">
+    <div class="start-title">The Trout's Promise</div>
+    <button class="start-btn">Tap to Begin</button>
+    <div class="start-hint">Frame 10 · Slovenia 1992 · 1.5s</div>
+  </div>
+
+</div>
+
+<script>
+  const bgFrame = document.getElementById('bgFrame');
+  const riverGlow = document.getElementById('riverGlow');
+  const year1992 = document.getElementById('year1992');
+  const year2007 = document.getElementById('year2007');
+  const timelineLine = document.getElementById('timelineLine');
+  const blackFade = document.getElementById('blackFade');
+  const frameLabel = document.getElementById('frameLabel');
+  const replayBtn = document.getElementById('replayBtn');
+  const startOverlay = document.getElementById('startOverlay');
+
+  let timers = [];
+
+  function clearTimers() {
+    timers.forEach(t => clearTimeout(t));
+    timers = [];
+  }
+
+  function startFrame() {
+    clearTimers();
+    startOverlay.classList.add('hidden');
+
+    // 0.0s — 黑色渐入
+    blackFade.classList.remove('fading');
+    void blackFade.offsetWidth;
+    blackFade.classList.add('fading');
+
+    // 0.0s — 背景图淡入 + 镜头运动（左移+推近）
+    bgFrame.classList.remove('active');
+    void bgFrame.offsetWidth;
+    bgFrame.classList.add('active');
+
+    // 0.3s — 金色河流光效开始
+    timers.push(setTimeout(() => {
+      riverGlow.classList.add('active');
+    }, 300));
+
+    // 0.5s — 时间轴"1992"弹出
+    timers.push(setTimeout(() => {
+      year1992.classList.add('visible');
+    }, 500));
+
+    // 0.6s — 帧标签淡入
+    timers.push(setTimeout(() => {
+      frameLabel.classList.add('visible');
+    }, 600));
+
+    // 1.5s — 帧结束，显示重播按钮
+    timers.push(setTimeout(() => {
+      replayBtn.classList.add('visible');
+    }, 1500));
+  }
+
+  function replay() {
+    clearTimers();
+    // 重置所有状态
+    bgFrame.classList.remove('active');
+    riverGlow.classList.remove('active');
+    year1992.classList.remove('visible');
+    timelineLine.classList.remove('grown');
+    blackFade.classList.remove('fading');
+    blackFade.style.opacity = '1';
+    frameLabel.classList.remove('visible');
+    replayBtn.classList.remove('visible');
+
+    // 重新开始
+    setTimeout(() => {
+      blackFade.style.opacity = '';
+      startFrame();
+    }, 300);
+  }
+
+  // 事件监听
+  startOverlay.addEventListener('click', startFrame);
+  replayBtn.addEventListener('click', replay);
+
+  // 点击屏幕 = 重播（帧结束后）
+  document.getElementById('player').addEventListener('click', (e) => {
+    if (e.target.closest('#startOverlay') || e.target.closest('#replayBtn')) return;
+    if (replayBtn.classList.contains('visible')) {
+      replay();
+    }
+  });
+
+  // 键盘控制
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      if (!startOverlay.classList.contains('hidden')) {
+        startFrame();
+      } else if (replayBtn.classList.contains('visible')) {
+        replay();
+      }
+    }
+  });
+
+  // 预加载图片
+  const preloadImg = new Image();
+  preloadImg.src = 'images/11.jpg';
+
+  console.log('Frame 10 loaded: Time Story · 1992');
+  console.log('0.0s — black fade in + bg + camera move (left + zoom)');
+  console.log('0.3s — golden river glow starts');
+  console.log('0.5s — year 1992 pops in');
+  console.log('1.5s — frame ends, replay button appears');
+</script>
+
+</body>
+</html>
